@@ -569,6 +569,7 @@ async function onAuth(){
   const {data:prof}=await app.from('profiles').select('role').eq('id',authUser.id).maybeSingle();
   myRole=(prof&&prof.role)||'user';
   document.body.classList.toggle('role-user', !isAdmin());
+  rtReady=false; startRealtime();
   const localBackup=store;
   await loadFromSupabase();
   if(isAdmin() && store.projects.length===0 && localBackup && localBackup.projects && localBackup.projects.length && (localBackup.data[localBackup.current]||{}).contacts){
@@ -576,7 +577,7 @@ async function onAuth(){
   }
   $("#loginBtn").disabled=false; hideLogin(); $("#connectBtn").textContent="Abmelden";
   setStorage(true, authUser.email+(isAdmin()?" · Admin":" · Nutzer"));
-  applyStaticLang(); renderAll(); startRealtime();
+  rtReady=true; applyStaticLang(); renderAll();
 }
 async function doLogout(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} authUser=null; myRole='user'; location.reload(); }
 async function sbAll(app,table,pid){
@@ -630,7 +631,7 @@ async function sbDel(pid,table,arr){
   loadedIds[pid][table]=cur;
 }
 /* ===== Echtzeit-Sync: Live-Updates zwischen Nutzern (Supabase Realtime) ===== */
-let rtChannel=null, rtTimer=null, lastLocalWrite=0, rtPendingProjects=false, rtStatus="", rtRetry=null;
+let rtChannel=null, rtTimer=null, lastLocalWrite=0, rtPendingProjects=false, rtStatus="", rtRetry=null, rtReady=false;
 function setRtBadge(){ const el=$("#storageLbl"); if(!el) return;
   if(rtStatus==='SUBSCRIBED') el.textContent=tr("s_sync")+" · Live"; }
 function startRealtime(){
@@ -649,12 +650,12 @@ function startRealtime(){
 }
 function ownEcho(){ return sbSaving || (Date.now()-lastLocalWrite)<1800; }
 function onRemoteChange(payload){
-  if(ownEcho()) return;
+  if(!rtReady||ownEcho()) return;
   const row=payload.new||payload.old||{}; const pid=row.project_id;
   if(pid && store && pid!==store.current){ if(loadedIds[pid]) loadedIds[pid]._stale=true; return; }
   scheduleRemoteReload(false);
 }
-function onRemoteProjects(payload){ if(ownEcho()) return; scheduleRemoteReload(true); }
+function onRemoteProjects(payload){ if(!rtReady||ownEcho()) return; scheduleRemoteReload(true); }
 function scheduleRemoteReload(fullReload){
   if(fullReload) rtPendingProjects=true;
   clearTimeout(rtTimer);
@@ -774,7 +775,7 @@ async function tryReconnect(){
   else{setStorage(false,"Klicke zum Verbinden");}
 }
 function setStorage(ok,label){const b=$("#storageBox");b.classList.toggle("ok",!!ok);$("#storageLbl").textContent=tr(ok?"s_sync":"s_disc");
-  $("#connectBtn").textContent=tr(ok?"s_other":"s_conn");}
+  $("#connectBtn").textContent=tr(ok?"s_other":"s_conn"); if(ok&&typeof setRtBadge==='function')setRtBadge();}
 
 /* ============================ Helpers ============================ */
 const byId=(arr,id)=>arr.find(x=>x.id===id);
