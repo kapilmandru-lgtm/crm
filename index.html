@@ -637,16 +637,19 @@ function setRtBadge(){ const el=$("#storageLbl"); if(!el) return;
 function startRealtime(){
   const app=sbInit(); if(!app||!authUser) return;
   if(rtChannel){ try{app.removeChannel(rtChannel);}catch(e){} rtChannel=null; }
-  rtChannel=app.channel('crm-live')
-    .on('postgres_changes',{event:'*',schema:'public',table:'companies'},onRemoteChange)
-    .on('postgres_changes',{event:'*',schema:'public',table:'contacts'},onRemoteChange)
-    .on('postgres_changes',{event:'*',schema:'public',table:'deals'},onRemoteChange)
-    .on('postgres_changes',{event:'*',schema:'public',table:'activities'},onRemoteChange)
-    .on('postgres_changes',{event:'*',schema:'public',table:'projects'},onRemoteProjects)
-    .subscribe(st=>{ rtStatus=String(st); setRtBadge();
-      if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'){ clearTimeout(rtRetry); rtRetry=setTimeout(startRealtime,4000); } });
+  const doSub=function(){
+    rtChannel=app.channel('crm-live')
+      .on('postgres_changes',{event:'*',schema:'public',table:'companies'},onRemoteChange)
+      .on('postgres_changes',{event:'*',schema:'public',table:'contacts'},onRemoteChange)
+      .on('postgres_changes',{event:'*',schema:'public',table:'deals'},onRemoteChange)
+      .on('postgres_changes',{event:'*',schema:'public',table:'activities'},onRemoteChange)
+      .on('postgres_changes',{event:'*',schema:'public',table:'projects'},onRemoteProjects)
+      .subscribe(st=>{ rtStatus=String(st); setRtBadge();
+        if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'){ clearTimeout(rtRetry); rtRetry=setTimeout(startRealtime,4000); } });
+  };
   try{ app.auth.getSession().then(r=>{ const s=r&&r.data&&r.data.session;
-    if(s&&app.realtime&&app.realtime.setAuth) app.realtime.setAuth(s.access_token); }).catch(function(){}); }catch(e){}
+    if(s&&app.realtime&&app.realtime.setAuth){ try{app.realtime.setAuth(s.access_token);}catch(e){} }
+    doSub(); }).catch(function(){ doSub(); }); }catch(e){ doSub(); }
 }
 function ownEcho(){ return sbSaving || (Date.now()-lastLocalWrite)<1800; }
 function onRemoteChange(payload){
