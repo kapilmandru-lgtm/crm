@@ -630,10 +630,11 @@ async function sbDel(pid,table,arr){
   loadedIds[pid][table]=cur;
 }
 /* ===== Echtzeit-Sync: Live-Updates zwischen Nutzern (Supabase Realtime) ===== */
-let rtChannel=null, rtTimer=null, lastLocalWrite=0, rtPendingProjects=false;
-async function startRealtime(){
+let rtChannel=null, rtTimer=null, lastLocalWrite=0, rtPendingProjects=false, rtStatus="", rtRetry=null;
+function setRtBadge(){ const el=$("#storageLbl"); if(!el) return;
+  if(rtStatus==='SUBSCRIBED') el.textContent=tr("s_sync")+" · Live"; }
+function startRealtime(){
   const app=sbInit(); if(!app||!authUser) return;
-  try{const {data}=await app.auth.getSession(); if(data&&data.session&&app.realtime&&app.realtime.setAuth) app.realtime.setAuth(data.session.access_token);}catch(e){}
   if(rtChannel){ try{app.removeChannel(rtChannel);}catch(e){} rtChannel=null; }
   rtChannel=app.channel('crm-live')
     .on('postgres_changes',{event:'*',schema:'public',table:'companies'},onRemoteChange)
@@ -641,7 +642,10 @@ async function startRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'deals'},onRemoteChange)
     .on('postgres_changes',{event:'*',schema:'public',table:'activities'},onRemoteChange)
     .on('postgres_changes',{event:'*',schema:'public',table:'projects'},onRemoteProjects)
-    .subscribe();
+    .subscribe(st=>{ rtStatus=String(st); setRtBadge();
+      if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'){ clearTimeout(rtRetry); rtRetry=setTimeout(startRealtime,4000); } });
+  try{ app.auth.getSession().then(r=>{ const s=r&&r.data&&r.data.session;
+    if(s&&app.realtime&&app.realtime.setAuth) app.realtime.setAuth(s.access_token); }).catch(function(){}); }catch(e){}
 }
 function ownEcho(){ return sbSaving || (Date.now()-lastLocalWrite)<1800; }
 function onRemoteChange(payload){
