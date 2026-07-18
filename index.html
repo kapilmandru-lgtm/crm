@@ -237,6 +237,7 @@
       <button class="btn sec" id="outlookBtn">✉ <span data-i18n="h_outlook">Outlook</span></button>
       <button class="btn sec" id="exportBtn">⬇ <span data-i18n="h_export">Export</span></button>
       <button class="btn sec" id="importBtn">⇪ <span data-i18n="h_import">Import</span></button>
+      <button class="btn sec" id="pipeSyncBtn" onclick="pipelineSyncOpen()">🔄 Excel-Sync</button>
       <button class="btn" id="addBtn" data-i18n="h_new">+ Neu</button>
     </header>
     <div class="content" id="content"></div>
@@ -1211,6 +1212,103 @@ async function readXlsx(buf){
 }
 function colIdx(a){let n=0;for(const c of a)n=n*26+(c.charCodeAt(0)-64);return n-1;}
 function unxml(s){return s.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(_,d)=>String.fromCharCode(+d)).replace(/&amp;/g,"&");}
+
+/* ===== Excel-Sync: pipeline_1.xlsx <-> CRM-SAP — Stufe A: Excel -> CRM (liest nur, schreibt NIE in die Excel) ===== */
+const PIPE_TITLE2STAGE={"anfragen":"lead","interviews":"angebot","nach interview no":"verloren","nach interview yes":"verhandlung","aktive projekte":"gewonnen"};
+const pipeNorm=s=>(""+ (s==null?"":s)).toLowerCase().replace(/\s+/g," ").trim();
+function pipeNum(v){ v=(""+(v==null?"":v)).replace(/[^\d.,-]/g,"").replace(/\.(?=\d{3}(\D|$))/g,"").replace(",","."); const n=parseFloat(v); return isNaN(n)?0:n; }
+function pipeDate(v){ v=(""+(v==null?"":v)).trim(); if(/^\d{4,5}$/.test(v)){ const d=new Date(Date.UTC(1899,11,30+ +v)); return d.toISOString().slice(0,10);} if(/^\d{4}-\d{2}-\d{2}/.test(v))return v.slice(0,10); return ""; }
+function pipeTitle(modul,berater,kunde){ const l=[modul,berater].filter(x=>x).join(" – "); return (l?l+" @ ":"")+(kunde||"?"); }
+async function readXlsxAllSheets(buf){
+  const dv=new DataView(buf),u8=new Uint8Array(buf),dec=new TextDecoder();
+  let eo=-1;for(let i=u8.length-22;i>=0;i--){if(dv.getUint32(i,true)===0x06054b50){eo=i;break;}}
+  if(eo<0)throw new Error("Keine gueltige xlsx-Datei");
+  const cdCount=dv.getUint16(eo+10,true),cdOff=dv.getUint32(eo+16,true);const entries=[];let p=cdOff;
+  for(let n=0;n<cdCount;n++){ if(dv.getUint32(p,true)!==0x02014b50)break;
+    const method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true),fnLen=dv.getUint16(p+28,true),exLen=dv.getUint16(p+30,true),cmLen=dv.getUint16(p+32,true),lho=dv.getUint32(p+42,true);
+    entries.push({name:dec.decode(u8.subarray(p+46,p+46+fnLen)),method,csize,lho});p+=46+fnLen+exLen+cmLen; }
+  async function extract(e){ const lfn=dv.getUint16(e.lho+26,true),lex=dv.getUint16(e.lho+28,true);const st=e.lho+30+lfn+lex,raw=u8.subarray(st,st+e.csize);const bytes=e.method===0?raw:await inflateRaw(raw);return dec.decode(bytes); }
+  const files={};for(const e of entries)if(e.name==="xl/sharedStrings.xml"||/^xl\/worksheets\/sheet/.test(e.name))files[e.name]=await extract(e);
+  const shared=[];const ss=files["xl/sharedStrings.xml"];
+  if(ss)for(const m of ss.matchAll(/<si>([\s\S]*?)<\/si>/g)){let t="";for(const tm of m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g))t+=tm[1];shared.push(unxml(t));}
+  const sheetNames=Object.keys(files).filter(k=>/^xl\/worksheets\/sheet/.test(k)).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  const sheets=[];
+  for(const sn of sheetNames){ const xml=files[sn]||"";const rows=[];
+    for(const rm of xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)){ const cells=[];
+      for(const cm of rm[1].matchAll(/<c\s+r="([A-Z]+)\d+"([^>]*)>([\s\S]*?)<\/c>/g)){ const col=colIdx(cm[1]),attr=cm[2],inner=cm[3];let v="";const isStr=/t="s"/.test(attr);const vm=inner.match(/<v>([\s\S]*?)<\/v>/);const im=inner.match(/<is>[\s\S]*?<t[^>]*>([\s\S]*?)<\/t>/); if(im)v=unxml(im[1]);else if(vm)v=isStr?(shared[+vm[1]]!=null?shared[+vm[1]]:""):unxml(vm[1]);cells[col]=v; }
+      for(let i=0;i<cells.length;i++)if(cells[i]==null)cells[i]="";rows.push(cells); }
+    sheets.push(rows); }
+  return sheets;
+}
+function pipelineRows(sheets){
+  const out=[];
+  sheets.forEach(rows=>{ const title=pipeNorm((rows[0]&&rows[0][0])||""); const stage=PIPE_TITLE2STAGE[title]; if(!stage)return;
+    let hdr=false;
+    for(const r of rows){ const kunde=(r[1]||"").trim();
+      if(!hdr){ if(pipeNorm(kunde).indexOf("kunde")>=0)hdr=true; continue; }
+      const kn=pipeNorm(kunde); if(!kunde||kn==="summe gesamt"||kn==="mittelwert")continue;
+      const modul=(r[4]||"").trim(),berater=(r[5]||"").trim();
+      out.push({stage,kunde,kontakt:(r[2]||"").trim(),vorgestellt:pipeDate(r[3]),modul,berater,rateTag:pipeNum(r[6]),rateHrs:pipeNum(r[7]),title:pipeTitle(modul,berater,kunde)}); }
+  });
+  return out;
+}
+function pipelineCompare(rows){
+  const byTitle=new Map(); db.deals.forEach(d=>{ const k=pipeNorm(d.title); if(!byTitle.has(k))byTitle.set(k,d); });
+  const toAdd=[],toUpdate=[],used=new Set();
+  rows.forEach(pr=>{ const k=pipeNorm(pr.title); used.add(k); const d=byTitle.get(k);
+    if(!d){ toAdd.push(pr); return; }
+    const ch={};
+    if(d.stage!==pr.stage)ch.Phase=[d.stage,pr.stage];
+    if((+d.value||0)!==(+pr.rateTag||0))ch["Rate/Tag"]=[d.value||0,pr.rateTag];
+    if(pr.vorgestellt&&(d.closeDate||"")!==pr.vorgestellt)ch.Datum=[d.closeDate||"",pr.vorgestellt];
+    if(Object.keys(ch).length)toUpdate.push({deal:d,pr,ch}); });
+  const onlyCrm=db.deals.filter(d=>!used.has(pipeNorm(d.title)));
+  return {toAdd,toUpdate,onlyCrm};
+}
+async function pipelineSyncOpen(){
+  const cur=store&&store.projects.find(p=>p.id===store.current);
+  if(!cur||pipeNorm(cur.name)!=="sap"){ alert("Der Excel-Sync gilt fuer das Projekt „SAP“. Bitte oben links zu SAP wechseln."); return; }
+  if(!window.showOpenFilePicker){ alert("Der Excel-Sync braucht Chrome oder Edge (Dateizugriff)."); return; }
+  const h=await idbGet("pipelineHandle");
+  openModal('<div class="mh"><h3>🔄 Excel-Sync — pipeline_1.xlsx</h3><button class="x" onclick="closeModal()">×</button></div>'
+    +'<div class="mb"><p class="muted" style="margin-top:0">Gleicht deine SAP-Pipeline-Excel mit dem CRM ab. <b>Stufe A</b>: liest die Excel und zeigt, was neu/geändert ins CRM kommt — deine Excel wird dabei <b>nicht</b> verändert.</p>'
+    +'<div id="pipeStep">'+(h?'<button class="btn" onclick="pipelineRun()">🔍 Jetzt abgleichen</button> <span class="muted">Datei ist verbunden.</span>':'<button class="btn" onclick="pipelineConnect()">📄 pipeline_1.xlsx verbinden</button>')+'</div></div>');
+}
+async function pipelineConnect(){
+  try{ const picked=await window.showOpenFilePicker({types:[{description:"Excel",accept:{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":[".xlsx"]}}]});
+    await idbSet("pipelineHandle",picked[0]); pipelineRun();
+  }catch(e){ if(e.name!=="AbortError")alert("Fehler: "+e.message); }
+}
+async function pipelineRun(){
+  try{ const h=await idbGet("pipelineHandle"); if(!h){pipelineConnect();return;}
+    if(h.queryPermission&&(await h.queryPermission({mode:"read"}))!=="granted"){ if((await h.requestPermission({mode:"read"}))!=="granted"){alert("Kein Lesezugriff auf die Datei.");return;} }
+    const step=document.getElementById("pipeStep"); if(step)step.innerHTML='<span class="muted">Lese Excel…</span>';
+    const file=await h.getFile(); const sheets=await readXlsxAllSheets(await file.arrayBuffer());
+    const rows=pipelineRows(sheets); const diff=pipelineCompare(rows); window._psync=diff; pipelinePreview(diff,rows.length);
+  }catch(e){ const step=document.getElementById("pipeStep"); if(step)step.innerHTML='<span style="color:var(--red)">Fehler: '+esc(e.message)+'</span>'; }
+}
+function pipeStageName(id){const s=DEFAULT_STAGES.find(x=>x.id===id);return s?s.name:id;}
+function pipelinePreview(diff,total){
+  const add=diff.toAdd.length?diff.toAdd.map(p=>'<tr><td>'+esc(p.title)+'</td><td>'+esc(pipeStageName(p.stage))+'</td><td class="right">'+(p.rateTag?eur(p.rateTag):"")+'</td></tr>').join(""):'<tr><td colspan="3" class="muted">—</td></tr>';
+  const upd=diff.toUpdate.length?diff.toUpdate.map(u=>'<tr><td>'+esc(u.deal.title)+'</td><td>'+Object.keys(u.ch).map(k=>k+": "+esc(k==="Phase"?pipeStageName(u.ch[k][0]):(""+u.ch[k][0]||"—"))+" → "+esc(k==="Phase"?pipeStageName(u.ch[k][1]):(""+u.ch[k][1]||"—"))).join("<br>")+'</td></tr>').join(""):'<tr><td colspan="2" class="muted">—</td></tr>';
+  const step=document.getElementById("pipeStep"); if(!step)return;
+  step.innerHTML='<div style="margin-bottom:8px">Excel gelesen: <b>'+total+'</b> Zeilen · <span style="color:#1eae6b">'+diff.toAdd.length+' neu</span> · <span style="color:#e6a417">'+diff.toUpdate.length+' geändert</span> · <span class="muted">'+diff.onlyCrm.length+' nur im CRM (bleiben)</span></div>'
+    +'<div style="max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:10px">'
+    +'<b style="color:#1eae6b">Neu ins CRM ('+diff.toAdd.length+')</b><table style="width:100%;font-size:12.5px"><tbody>'+add+'</tbody></table>'
+    +'<b style="color:#e6a417;display:block;margin-top:10px">Geändert ('+diff.toUpdate.length+')</b><table style="width:100%;font-size:12.5px"><tbody>'+upd+'</tbody></table></div>'
+    +((diff.toAdd.length||diff.toUpdate.length)?'<button class="btn" onclick="pipelineApply()">✔ Ins CRM übernehmen</button> ':'<span class="muted">Nichts zu übernehmen — CRM ist auf Stand. </span>')
+    +'<button class="btn sec" onclick="closeModal()">Schließen</button>';
+}
+function pipelineApply(){
+  const diff=window._psync; if(!diff)return; let nAdd=0,nUpd=0;
+  diff.toAdd.forEach(pr=>{ const cid=findOrCreateCompany(pr.kunde); let ctid="";
+    if(pr.kontakt&&pr.kontakt.indexOf(" ")>0){ const ex=db.contacts.find(x=>x.companyId===cid&&pipeNorm(contactName(x.id))===pipeNorm(pr.kontakt));
+      if(ex)ctid=ex.id; else{ const parts=pr.kontakt.split(/\s+/); const c={id:uid(),createdAt:Date.now(),firstName:parts[0],lastName:parts.slice(1).join(" "),companyId:cid,position:"",title:"",lastContact:"",email:"",phone:"",tags:["Pipeline"],notes:""};db.contacts.push(c);ctid=c.id; } }
+    db.deals.push({id:uid(),createdAt:Date.now(),title:pr.title,value:pr.rateTag,stage:pr.stage,companyId:cid,contactId:ctid,closeDate:pr.vorgestellt||"",done:false,notes:pr.rateHrs?("Rate/Std: "+pr.rateHrs):""}); nAdd++; });
+  diff.toUpdate.forEach(u=>{ const d=u.deal; if(u.ch.Phase)d.stage=u.ch.Phase[1]; if(u.ch["Rate/Tag"])d.value=u.ch["Rate/Tag"][1]; if(u.ch.Datum)d.closeDate=u.ch.Datum[1]; nUpd++; });
+  window._psync=null; save(); closeModal(); state.view="deals"; sel.clear(); if(document.getElementById("searchInput"))document.getElementById("searchInput").value=""; state.search=""; renderAll();
+  toast("Excel → CRM: "+nAdd+" neu, "+nUpd+" aktualisiert");
+}
 
 // ---- Field definitions per entity ----
 const IMPORT_FIELDS={
