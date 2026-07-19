@@ -1272,7 +1272,7 @@ async function pipelineSyncOpen(){
   const h=await idbGet("pipelineHandle");
   openModal('<div class="mh"><h3>🔄 Excel-Sync — pipeline_1.xlsx</h3><button class="x" onclick="closeModal()">×</button></div>'
     +'<div class="mb"><p class="muted" style="margin-top:0">Gleicht deine SAP-Pipeline-Excel mit dem CRM ab. <b>Stufe A</b>: liest die Excel und zeigt, was neu/geändert ins CRM kommt — deine Excel wird dabei <b>nicht</b> verändert.</p>'
-    +'<div id="pipeStep">'+(h?'<button class="btn" onclick="pipelineRun()">🔍 Jetzt abgleichen</button> <span class="muted">Datei ist verbunden.</span>':'<button class="btn" onclick="pipelineConnect()">📄 pipeline_1.xlsx verbinden</button>')+'</div></div>');
+    +'<div id="pipeStep">'+(h?'<button class="btn" onclick="pipelineRun()">🔍 Excel → CRM</button> <button class="btn sec" onclick="pipelineWriteOpen()">📤 CRM → Excel</button><div class="muted" style="margin-top:6px">Datei verbunden.</div>':'<button class="btn" onclick="pipelineConnect()">📄 pipeline_1.xlsx verbinden</button>')+'</div></div>');
 }
 async function pipelineConnect(){
   try{ const picked=await window.showOpenFilePicker({types:[{description:"Excel",accept:{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":[".xlsx"]}}]});
@@ -1308,6 +1308,98 @@ function pipelineApply(){
   diff.toUpdate.forEach(u=>{ const d=u.deal; if(u.ch.Phase)d.stage=u.ch.Phase[1]; if(u.ch["Rate/Tag"])d.value=u.ch["Rate/Tag"][1]; if(u.ch.Datum)d.closeDate=u.ch.Datum[1]; nUpd++; });
   window._psync=null; save(); closeModal(); state.view="deals"; sel.clear(); if(document.getElementById("searchInput"))document.getElementById("searchInput").value=""; state.search=""; renderAll();
   toast("Excel → CRM: "+nAdd+" neu, "+nUpd+" aktualisiert");
+}
+
+/* ===== Excel-Sync Stufe B: CRM -> Excel (schreibt zurueck, mit Auto-Backup) ===== */
+const _crcTab=(function(){const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function crc32(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=_crcTab[(c^u8[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+async function deflateRaw(u8){const cs=new CompressionStream("deflate-raw");const s=new Response(new Blob([u8]).stream().pipeThrough(cs));return new Uint8Array(await s.arrayBuffer());}
+function parseZipEntries(u8){
+  const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength);
+  let eo=-1;for(let i=u8.length-22;i>=0;i--){if(dv.getUint32(i,true)===0x06054b50){eo=i;break;}}
+  if(eo<0)throw new Error("EOCD nicht gefunden");
+  const cdCount=dv.getUint16(eo+10,true),cdOff=dv.getUint32(eo+16,true),dec=new TextDecoder();let p=cdOff;const items=[];
+  for(let n=0;n<cdCount;n++){ if(dv.getUint32(p,true)!==0x02014b50)break;
+    const method=dv.getUint16(p+10,true),crc=dv.getUint32(p+16,true),csize=dv.getUint32(p+20,true),usize=dv.getUint32(p+24,true),fnLen=dv.getUint16(p+28,true),exLen=dv.getUint16(p+30,true),cmLen=dv.getUint16(p+32,true),lho=dv.getUint32(p+42,true);
+    const name=dec.decode(u8.subarray(p+46,p+46+fnLen));const lfn=dv.getUint16(lho+26,true),lex=dv.getUint16(lho+28,true),ds=lho+30+lfn+lex;
+    items.push({name,method,crc,csize,usize,comp:u8.subarray(ds,ds+csize)});p+=46+fnLen+exLen+cmLen; }
+  return items;
+}
+async function buildXlsx(origU8,replace){
+  const items=parseZipEntries(origU8),enc=new TextEncoder();
+  for(const it of items){ if(replace[it.name]){ const u=replace[it.name],def=await deflateRaw(u); it.method=8;it.crc=crc32(u);it.usize=u.length;it.csize=def.length;it.comp=def; } }
+  const parts=[],central=[];let offset=0;
+  for(const it of items){ const nb=enc.encode(it.name);
+    const lh=new Uint8Array(30+nb.length),l=new DataView(lh.buffer);
+    l.setUint32(0,0x04034b50,true);l.setUint16(4,20,true);l.setUint16(8,it.method,true);l.setUint32(14,it.crc,true);l.setUint32(18,it.csize,true);l.setUint32(22,it.usize,true);l.setUint16(26,nb.length,true);lh.set(nb,30);
+    parts.push(lh,it.comp);
+    const ch=new Uint8Array(46+nb.length),c=new DataView(ch.buffer);
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(10,it.method,true);c.setUint32(16,it.crc,true);c.setUint32(20,it.csize,true);c.setUint32(24,it.usize,true);c.setUint16(28,nb.length,true);c.setUint32(42,offset,true);ch.set(nb,46);
+    central.push(ch);offset+=lh.length+it.comp.length; }
+  let cdLen=0;for(const c of central)cdLen+=c.length;
+  const eocd=new Uint8Array(22),e=new DataView(eocd.buffer);
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,items.length,true);e.setUint16(10,items.length,true);e.setUint32(12,cdLen,true);e.setUint32(16,offset,true);
+  const out=new Uint8Array(offset+cdLen+22);let q=0;
+  for(const pt of parts){out.set(pt,q);q+=pt.length;}for(const c of central){out.set(c,q);q+=c.length;}out.set(eocd,q);
+  return out;
+}
+function xmlEsc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function xCellT(ref,s,t){t=(t==null?"":String(t));return t?'<c r="'+ref+'" s="'+s+'" t="inlineStr"><is><t>'+xmlEsc(t)+'</t></is></c>':'<c r="'+ref+'" s="'+s+'" t="n" />';}
+function xCellN(ref,s,n){return (n==null||n==="")?'<c r="'+ref+'" s="'+s+'" t="n" />':'<c r="'+ref+'" s="'+s+'" t="n"><v>'+n+'</v></c>';}
+function xlsxSheetRewrite(xml,deals){
+  const st={A:4,B:5,C:5,D:6,E:4,F:4,G:7,H:7};
+  const r6=xml.match(/<row r="6"[^>]*>([\s\S]*?)<\/row>/);
+  if(r6)for(const col of Object.keys(st)){const cm=r6[1].match(new RegExp('<c r="'+col+'6" s="(\\d+)"'));if(cm)st[col]=+cm[1];}
+  let rows="";
+  deals.forEach(function(d,i){const r=6+i;
+    rows+='<row r="'+r+'" ht="15" customHeight="1">'+xCellN("A"+r,st.A,i+1)+xCellT("B"+r,st.B,d.kunde)+xCellT("C"+r,st.C,d.kontakt)+xCellN("D"+r,st.D,d.serial)+xCellT("E"+r,st.E,d.modul)+xCellT("F"+r,st.F,d.berater)+xCellN("G"+r,st.G,d.rateTag)+xCellN("H"+r,st.H,d.rateHrs)+'</row>';});
+  const last=Math.max(30,5+deals.length);
+  let out=xml.replace(/(<row r="5"[^>]*>[\s\S]*?<\/row>)([\s\S]*?)(<\/sheetData>)/,function(m,a,b,c){return a+rows+c;});
+  out=out.split("G6:G30").join("G6:G"+last).split("H6:H30").join("H6:H"+last).split("A1:H30").join("A1:H"+last);
+  return out;
+}
+function isoToSerial(iso){if(!iso)return "";const d=new Date(iso+"T00:00:00Z");if(isNaN(d.getTime()))return "";return Math.round((d.getTime()-Date.UTC(1899,11,30))/86400000);}
+function dealToRow(d){
+  let kunde=companyName(d.companyId); if(!kunde){const m=(d.title||"").match(/@ (.+)$/);kunde=m?m[1].trim():(d.title||"");}
+  const kontakt=contactName(d.contactId)||"";
+  let modul="",berater="";const m=(d.title||"").match(/^(.*?) – (.*?) @ /);if(m){modul=m[1];berater=m[2];}
+  const rt=+d.value||0;
+  return {kunde,kontakt,serial:isoToSerial(d.closeDate),modul,berater,rateTag:rt||"",rateHrs:rt?Math.round(rt/8*100)/100:""};
+}
+function pipeGroupDeals(){const g={};db.deals.forEach(function(d){(g[d.stage]=g[d.stage]||[]).push(dealToRow(d));});return g;}
+function pipeDownload(u8,name){const b=new Blob([u8],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);}
+function pipelineWriteOpen(){
+  const step=document.getElementById("pipeStep");if(!step)return;
+  const g=pipeGroupDeals();
+  const stages=[["lead","Anfragen"],["angebot","Interviews"],["verloren","Nach Interview NO"],["verhandlung","Nach Interview YES"],["gewonnen","Aktive Projekte"]];
+  const rowsHtml=stages.map(function(x){return '<tr><td>'+x[1]+'</td><td class="right"><b>'+((g[x[0]]||[]).length)+'</b> Deals</td></tr>';}).join("");
+  const kt=(g["kontaktiert"]||[]).length;
+  step.innerHTML='<div style="margin-bottom:8px">So wird <b>pipeline_1.xlsx</b> geschrieben — Datenzeilen ersetzt, <b>Formeln & Layout bleiben</b> erhalten:</div>'
+    +'<table style="width:100%;font-size:12.5px;margin-bottom:8px"><tbody>'+rowsHtml+'</tbody></table>'
+    +(kt?'<div class="muted" style="font-size:12px;margin-bottom:8px">Hinweis: '+kt+' Deal(s) in Phase „Vorgestellt" haben kein Excel-Blatt und werden nicht geschrieben.</div>':'')
+    +'<div style="font-size:12px;color:#1eae6b;margin-bottom:10px">✔ Vor dem Schreiben wird automatisch ein Backup heruntergeladen (Downloads-Ordner).</div>'
+    +'<button class="btn" onclick="pipelineWriteApply()">📤 Jetzt in Excel schreiben</button> <button class="btn sec" onclick="closeModal()">Abbrechen</button>';
+}
+async function pipelineWriteApply(){
+  const step=document.getElementById("pipeStep");
+  try{
+    const h=await idbGet("pipelineHandle");if(!h){alert("Bitte zuerst die Datei verbinden.");return;}
+    if(h.queryPermission&&(await h.queryPermission({mode:"readwrite"}))!=="granted"){ if((await h.requestPermission({mode:"readwrite"}))!=="granted"){alert("Kein Schreibzugriff auf die Datei erlaubt.");return;} }
+    if(step)step.innerHTML='<span class="muted">Lese Excel + Backup…</span>';
+    const file=await h.getFile();const buf=await file.arrayBuffer();const origU8=new Uint8Array(buf.slice(0));
+    const ts=new Date().toISOString().replace(/:/g,"-").replace("T","_").slice(0,16);
+    pipeDownload(origU8,"pipeline_1_backup_"+ts+".xlsx");
+    const g=pipeGroupDeals();const items=parseZipEntries(origU8);const replace={};
+    for(const it of items){ if(/^xl\/worksheets\/sheet/.test(it.name)){
+      const xml=new TextDecoder().decode(it.method===0?it.comp:await inflateRaw(it.comp));
+      const tm=xml.match(/<c r="A1"[^>]*><is><t>([^<]*)<\/t>/);const stage=PIPE_TITLE2STAGE[pipeNorm(tm?tm[1]:"")];
+      if(stage)replace[it.name]=new TextEncoder().encode(xlsxSheetRewrite(xml,g[stage]||[]));
+    }}
+    if(step)step.innerHTML='<span class="muted">Schreibe Excel…</span>';
+    const out=await buildXlsx(origU8,replace);
+    const w=await h.createWritable();await w.write(out);await w.close();
+    closeModal();toast("Excel aktualisiert ✔ — Backup liegt in Downloads.");
+  }catch(e){ if(step)step.innerHTML='<span style="color:var(--red)">Fehler: '+esc(e.message)+'</span>'; }
 }
 
 // ---- Field definitions per entity ----
