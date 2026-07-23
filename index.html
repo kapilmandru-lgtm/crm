@@ -538,8 +538,8 @@ const coIn=r=>({id:r.id,createdAt:r.created_at,name:r.name||"",industry:r.indust
 const coOut=(c,pid)=>({id:c.id,project_id:pid,name:c.name||"",industry:c.industry||"",website:c.website||"",phone:c.phone||"",address:c.address||"",notes:c.notes||""});
 const ctIn=r=>({id:r.id,createdAt:r.created_at,firstName:r.first_name||"",lastName:r.last_name||"",companyId:r.company_id||"",position:r.position||"",title:r.title||"",lastContact:r.last_contact||"",email:r.email||"",phone:r.phone||"",tags:r.tags||[],notes:r.notes||""});
 const ctOut=(c,pid)=>({id:c.id,project_id:pid,first_name:c.firstName||"",last_name:c.lastName||"",company_id:c.companyId||null,position:c.position||"",title:c.title||"",last_contact:c.lastContact||null,email:c.email||"",phone:c.phone||"",tags:c.tags||[],notes:c.notes||""});
-const dlIn=r=>({id:r.id,createdAt:r.created_at,title:r.title||"",value:+r.value||0,stage:r.stage||"lead",companyId:r.company_id||"",contactId:r.contact_id||"",closeDate:r.close_date||"",notes:r.notes||"",done:!!r.done});
-const dlOut=(d,pid)=>({id:d.id,project_id:pid,title:d.title||"",value:+d.value||0,stage:d.stage||"lead",company_id:d.companyId||null,contact_id:d.contactId||null,close_date:d.closeDate||null,notes:d.notes||"",done:!!d.done});
+const dlIn=r=>({id:r.id,createdAt:r.created_at,title:r.title||"",value:+r.value||0,stage:r.stage||"lead",companyId:r.company_id||"",contactId:r.contact_id||"",closeDate:r.close_date||"",notes:r.notes||"",done:!!r.done,candidate:r.candidate||""});
+const dlOut=(d,pid)=>({id:d.id,project_id:pid,title:d.title||"",value:+d.value||0,stage:d.stage||"lead",company_id:d.companyId||null,contact_id:d.contactId||null,close_date:d.closeDate||null,notes:d.notes||"",done:!!d.done,candidate:d.candidate||""});
 const acIn=r=>({id:r.id,createdAt:r.created_at,title:r.title||"",type:r.type||"task",dueDate:r.due_date||"",done:!!r.done,contactId:r.contact_id||"",dealId:r.deal_id||"",notes:r.notes||""});
 const acOut=(a,pid)=>({id:a.id,project_id:pid,title:a.title||"",type:a.type||"task",due_date:a.dueDate||null,done:!!a.done,contact_id:a.contactId||null,deal_id:a.dealId||null,notes:a.notes||""});
 function setAuthMode(m){authMode=m;const v={login:["Anmelden","Anmelden","Registrieren"],signup:["Konto erstellen","Registrieren","Zurück zur Anmeldung"]}[m];
@@ -929,8 +929,11 @@ function followUpDeal(id){const d=byId(db.deals,id);if(!d)return;
     notes:"Profil gesendet — nachfassen ("+(companyName(d.companyId)||contactName(d.contactId)||"")+")"});}
 
 /* ---- Next-Action & Lead-Score (regelbasiert, 0 €, kein externer KI-Dienst) ---- */
+// createdAt ist bei lokal neu angelegten Datensätzen eine Zahl (Date.now()), bei aus Supabase geladenen
+// Datensätzen aber ein ISO-Zeitstempel-Text (r.created_at) -> hier robust auf Millisekunden normalisieren.
+function toMs(t){if(!t)return 0;if(typeof t==="number")return t;const ms=new Date(t).getTime();return isNaN(ms)?0:ms;}
 function lastTouch(d){const acts=db.activities.filter(a=>a.dealId===d.id||(d.contactId&&a.contactId===d.contactId));
-  const ts=acts.map(a=>a.createdAt||0);return ts.length?Math.max(...ts):(d.createdAt||0);}
+  const ts=acts.map(a=>toMs(a.createdAt));return ts.length?Math.max(...ts):toMs(d.createdAt);}
 function daysSince(ts){return ts?Math.floor((Date.now()-ts)/86400000):999;}
 const STALE_DAYS=7;
 function staleOpenDeals(){
@@ -1001,7 +1004,7 @@ function viewCompanies(){
 }
 
 function viewDeals(){
-  const list=db.deals.filter(d=>matchSearch(`${d.title} ${companyName(d.companyId)} ${contactName(d.contactId)}`));
+  const list=db.deals.filter(d=>matchSearch(`${d.title} ${companyName(d.companyId)} ${contactName(d.contactId)} ${d.candidate||""}`));
   visibleIds=list.map(d=>d.id);
   sel.forEach(id=>{if(!byId(db.deals,id))sel.delete(id);});
   const visS=curStages().filter(s=>!hiddenStages.has(s.id));
@@ -1018,6 +1021,7 @@ function viewDeals(){
         <div class="t">${esc(d.title)}</div>
         <div class="v">${eur(d.value)} <span class="pill" style="background:${scoreColor(dealScore(d))}22;color:${scoreColor(dealScore(d))};font-size:11px;margin-left:4px" title="Lead-Score (Reaktionszeit + Aktivität + Rate)">★ ${dealScore(d)}</span></div>
         <div class="c">${esc(companyName(d.companyId)||contactName(d.contactId)||"—")}</div>
+        ${d.candidate?`<div class="c">👤 ${esc(d.candidate)}</div>`:""}
         ${d.closeDate?`<div class="c">◷ ${new Date(d.closeDate).toLocaleDateString("de-DE")}</div>`:""}
         ${dealHoursSum(d.id)?`<div class="c">⏱ ${dealHoursSum(d.id)}h erfasst</div>`:""}
         <div onclick="event.stopPropagation()" style="margin-top:8px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:6px">
@@ -1162,7 +1166,8 @@ function dealForm(d={}){openModal(`
       <div class="fld"><label>Phase</label><select name="stage">${curStages().map(s=>`<option value="${s.id}" ${s.id===(d.stage||"lead")?"selected":""}>${s.name}</option>`).join("")}</select></div></div>
     <div class="row2"><div class="fld"><label>Firma</label><select name="companyId">${companyOptions(d.companyId)}</select></div>
       <div class="fld"><label>Ansprechpartner</label><select name="contactId">${contactOptions(d.contactId)}</select></div></div>
-    <div class="fld"><label>Abschlussdatum</label><input name="closeDate" type="date" value="${esc(d.closeDate)}"></div>
+    <div class="row2"><div class="fld"><label>Kandidat</label><input name="candidate" value="${esc(d.candidate)}" placeholder="Name des Kandidaten/Beraters"></div>
+      <div class="fld"><label>Abschlussdatum</label><input name="closeDate" type="date" value="${esc(d.closeDate)}"></div></div>
     <div class="fld"><label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-weight:600"><input type="checkbox" name="done" ${d.done?"checked":""} style="width:17px;height:17px;accent-color:var(--green)"> Als erledigt markieren</label></div>
     <div class="fld"><label>Notizen</label><textarea name="notes">${esc(d.notes)}</textarea></div>
   </form></div>
@@ -1465,7 +1470,7 @@ async function pipelineWriteApply(){
 // ---- Field definitions per entity ----
 const IMPORT_FIELDS={
   contacts:[["firstName","Vorname"],["lastName","Nachname"],["fullName","Name (voll, wird getrennt)"],
-    ["company","Firma (Name)"],["position","Position"],["email","E-Mail"],["phone","Telefon"],["tags","Tags"],["notes","Notizen"],["linkedinUrl","LinkedIn-Profil (optional)"]],
+    ["company","Firma (Name)"],["position","Position"],["email","E-Mail"],["phone","Telefon"],["tags","Tags"],["notes","Notizen"]],
   companies:[["name","Firmenname"],["industry","Branche"],["website","Website"],["phone","Telefon"],["address","Adresse"],["notes","Notizen"]],
   deals:[["title","Titel"],["value","Wert (€)"],["stage","Phase"],["company","Firma (Name)"],["contact","Kontakt (Name)"],["closeDate","Abschlussdatum"],["notes","Notizen"]],
   activities:[["title","Titel"],["type","Typ"],["dueDate","Fällig am"],["contact","Kontakt (Name)"],["notes","Notizen"]],
@@ -1480,13 +1485,12 @@ const GUESS={firstName:["vorname","first","given"],lastName:["nachname","last","
   industry:["branche","industry","sektor"],website:["web","url","homepage","seite"],address:["adresse","address","anschrift","ort","straße","strasse"],
   title:["titel","title","betreff","bezeichnung","name"],value:["wert","value","betrag","umsatz","summe","preis","amount"],
   stage:["phase","stage","status"],contact:["kontakt","contact","ansprech","person"],
-  closeDate:["abschluss","close","datum","date"],dueDate:["fällig","faellig","due","datum","date","termin"],type:["typ","type","art"],
-  linkedinUrl:["linkedin","profile url","url"]};
+  closeDate:["abschluss","close","datum","date"],dueDate:["fällig","faellig","due","datum","date","termin"],type:["typ","type","art"]};
 
 let imp={type:"contacts",headers:[],rows:[],map:{},hasHeader:true};
 
 function importWizard(){
-  imp={type:(state.view in IMPORT_FIELDS?state.view:"contacts"),headers:[],rows:[],map:{},fileInfo:[],hasHeader:true,isLinkedin:false};
+  imp={type:(state.view in IMPORT_FIELDS?state.view:"contacts"),headers:[],rows:[],map:{},fileInfo:[],hasHeader:true};
   openModal(`
     <div class="mh"><h3>Daten importieren</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb">
@@ -1496,7 +1500,6 @@ function importWizard(){
       <div class="fld"><label>Dateien (CSV, TSV oder Excel .xlsx) — mehrere möglich</label>
         <input type="file" id="impFile" accept=".csv,.tsv,.txt,.xlsx" multiple onchange="handleImportFiles(this.files)"></div>
       <div class="muted" style="font-size:12.5px">Mehrere Dateien werden zusammengeführt (gleiche Spalten werden per Name erkannt). Erste Zeile = Spaltenüberschriften. Firmen werden bei Kontakten/Deals automatisch angelegt und verknüpft.</div>
-      <div class="muted" style="font-size:12.5px">🔗 LinkedIn-Kontakte: LinkedIn → Einstellungen &amp; Datenschutz → „Abrufen einer Kopie deiner Daten" → Verbindungen (CSV) exportieren, dann hier als Kontakte importieren — wird automatisch erkannt und mit Tag „LinkedIn" versehen.</div>
       <div id="impStep2"></div>
     </div>
     <div class="mf"><button class="btn sec" onclick="closeModal()">Abbrechen</button>
@@ -1536,10 +1539,9 @@ async function handleImportFiles(fileList){
       }
     }
     if(!imp.headers.length)throw new Error("Keine lesbaren Daten gefunden");
-    detectLinkedin();autoMap();renderMapping();
+    autoMap();renderMapping();
   }catch(e){step2.innerHTML=`<div class="pill" style="background:#fdeceb;color:var(--red);padding:8px 12px;display:block">Fehler: ${esc(e.message)}</div>`;}
 }
-function detectLinkedin(){const h=imp.headers.map(normH);imp.isLinkedin=h.includes("url")&&h.some(x=>x.indexOf("connected on")>=0);}
 function autoMap(){imp.map={};const used=new Set();
   for(const [field] of IMPORT_FIELDS[imp.type]){
     const keys=GUESS[field]||[field];
@@ -1594,14 +1596,10 @@ function runImport(){
       let fn=cell(r,"firstName"),ln=cell(r,"lastName");
       if(!fn&&!ln&&imp.map.fullName!=null){const parts=cell(r,"fullName").split(/\s+/);fn=parts.shift()||"";ln=parts.join(" ");}
       if(!fn&&!ln)continue;
-      const liUrl=cell(r,"linkedinUrl");let notes=cell(r,"notes");
-      if(liUrl)notes=(notes?notes+"\n":"")+"LinkedIn: "+liUrl;
-      const tags=cell(r,"tags").split(/[,;]/).map(x=>x.trim()).filter(Boolean);
-      if(imp.isLinkedin&&!tags.includes("LinkedIn"))tags.push("LinkedIn");
       db.contacts.push({id:uid(),createdAt:Date.now(),firstName:fn,lastName:ln,
         companyId:findOrCreateCompany(cell(r,"company")),position:cell(r,"position"),
         email:cell(r,"email"),phone:cell(r,"phone"),
-        tags,notes});count++;
+        tags:cell(r,"tags").split(/[,;]/).map(x=>x.trim()).filter(Boolean),notes:cell(r,"notes")});count++;
     }else if(t==="companies"){
       const name=cell(r,"name");if(!name)continue;
       db.companies.push({id:uid(),createdAt:Date.now(),name,industry:cell(r,"industry"),
@@ -1638,7 +1636,7 @@ function exportCompaniesCSV(){download(`firmen-${ymd()}.csv`,toCSV(db.companies,
   {label:"Telefon",get:c=>c.phone},{label:"Adresse",get:c=>c.address},{label:"Notizen",get:c=>c.notes}]),"text/csv");toast("Firmen exportiert");}
 function exportDealsCSV(){download(`deals-${ymd()}.csv`,toCSV(db.deals,[
   {label:"Titel",get:d=>d.title},{label:"Wert",get:d=>d.value},{label:"Phase",get:d=>stageOf(d.stage).name},
-  {label:"Firma",get:d=>companyName(d.companyId)},{label:"Kontakt",get:d=>contactName(d.contactId)},
+  {label:"Firma",get:d=>companyName(d.companyId)},{label:"Kontakt",get:d=>contactName(d.contactId)},{label:"Kandidat",get:d=>d.candidate},
   {label:"Abschlussdatum",get:d=>d.closeDate},{label:"Erledigt",get:d=>d.done?"ja":"nein"},{label:"Notizen",get:d=>d.notes}]),"text/csv");toast("Deals exportiert");}
 function exportActivitiesCSV(){download(`aktivitaeten-${ymd()}.csv`,toCSV(db.activities,[
   {label:"Titel",get:a=>a.title},{label:"Typ",get:a=>(ACT_TYPES[a.type]||{}).l||a.type},{label:"Fällig",get:a=>a.dueDate},
