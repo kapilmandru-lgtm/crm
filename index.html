@@ -285,7 +285,8 @@ function curStagesRaw(){const p=store&&store.projects&&store.projects.find(x=>x.
 /* Phasen mit in die aktuelle Sprache übersetzten Namen — für alle Anzeigen */
 function curStages(){return curStagesRaw().map(s=>({...s,name:stageLabel(s)}));}
 const ACT_TYPES={call:{l:"Anruf",i:"☎",c:"#2f6bff"},meeting:{l:"Termin",i:"◷",c:"#8b5cf6"},
-  email:{l:"E-Mail",i:"✉",c:"#0ea5e9"},task:{l:"Aufgabe",i:"✓",c:"#1eae6b"},followup:{l:"Follow-up",i:"↻",c:"#e6a417"}};
+  email:{l:"E-Mail",i:"✉",c:"#0ea5e9"},task:{l:"Aufgabe",i:"✓",c:"#1eae6b"},followup:{l:"Follow-up",i:"↻",c:"#e6a417"},
+  timesheet:{l:"Stunden",i:"⏱",c:"#14b8a6"}};
 const AV=["#2f6bff","#8b5cf6","#1eae6b","#e6a417","#e0483d","#0ea5e9","#ec4899","#14b8a6"];
 
 /* ============================ i18n (Sprachen) ============================ */
@@ -821,6 +822,7 @@ function viewDashboard(){
   const upcoming=[...openAct].sort((a,b)=>(a.dueDate||"9").localeCompare(b.dueDate||"9")).slice(0,6);
   const recentDeals=[...db.deals].sort((a,b)=>b.createdAt-a.createdAt).slice(0,5);
   const newInq=db.deals.filter(d=>d.stage==="lead").sort((a,b)=>b.createdAt-a.createdAt).slice(0,6);
+  const stale=staleOpenDeals();
   const stageData=curStages().map(s=>{const it=db.deals.filter(d=>d.stage===s.id);return {s,n:it.length,sum:it.reduce((a,d)=>a+(+d.value||0),0)};});
   const visStages=stageData.filter(x=>!hiddenStages.has(x.s.id));
   const maxSum=Math.max(1,...visStages.map(x=>x.sum));
@@ -856,6 +858,13 @@ function viewDashboard(){
         <td><b>${esc(d.title)}</b><div class="meta muted">${esc(companyName(d.companyId)||"—")}${d.contactId&&contactName(d.contactId)?" · "+esc(contactName(d.contactId)):""}</div></td>
         <td class="right muted" style="font-size:12px;white-space:nowrap">${d.createdAt?new Date(d.createdAt).toLocaleDateString("de-DE",{day:"2-digit",month:"short"}):""}</td>
         <td class="right"><b>${d.value?eur(d.value):""}</b></td></tr>`).join("")}</tbody></table>`:emptyBox(tr("d_noNewInq"))}
+    </div>
+    <div class="panel" style="margin-bottom:20px">
+      <div class="ph"><h3>🎯 Nächste Schritte${stale.length?` <span class="pill" style="background:#e0483d22;color:var(--red);margin-left:2px">${stale.length}</span>`:""}</h3></div>
+      ${stale.length?`<table><tbody>${stale.map(({d,days})=>`<tr onclick="openDeal('${d.id}')">
+        <td><b>${esc(d.title)}</b><div class="meta muted">${esc(companyName(d.companyId)||contactName(d.contactId)||"—")}</div></td>
+        <td class="right muted" style="font-size:12px;white-space:nowrap">${days} Tage ohne Aktivität</td>
+        <td class="right"><span onclick="event.stopPropagation();followUpDeal('${d.id}')" style="cursor:pointer;color:var(--brand);font-weight:600;white-space:nowrap">↻ Follow-up</span></td></tr>`).join("")}</tbody></table>`:emptyBox("Alles auf dem neuesten Stand — keine Deals ohne Aktivität")}
     </div>
     <div class="grid2">
       <div class="panel"><div class="ph"><h3>${tr("d_upcoming")}</h3><button class="btn sm sec" onclick="go('activities')">${tr("d_all")}</button></div>
@@ -919,6 +928,54 @@ function followUpDeal(id){const d=byId(db.deals,id);if(!d)return;
   activityForm({type:"followup",title:"Follow-up: "+d.title,dueDate:inDays(3),contactId:d.contactId||"",dealId:id,
     notes:"Profil gesendet — nachfassen ("+(companyName(d.companyId)||contactName(d.contactId)||"")+")"});}
 
+/* ---- Next-Action & Lead-Score (regelbasiert, 0 €, kein externer KI-Dienst) ---- */
+function lastTouch(d){const acts=db.activities.filter(a=>a.dealId===d.id||(d.contactId&&a.contactId===d.contactId));
+  const ts=acts.map(a=>a.createdAt||0);return ts.length?Math.max(...ts):(d.createdAt||0);}
+function daysSince(ts){return ts?Math.floor((Date.now()-ts)/86400000):999;}
+const STALE_DAYS=7;
+function staleOpenDeals(){
+  return db.deals.filter(d=>d.stage!=="gewonnen"&&d.stage!=="verloren"&&!d.done)
+    .map(d=>({d,days:daysSince(lastTouch(d))}))
+    .filter(x=>x.days>=STALE_DAYS)
+    .filter(x=>!db.activities.some(a=>a.dealId===x.d.id&&!a.done))
+    .sort((a,b)=>b.days-a.days);
+}
+function dealScore(d){
+  const acts=db.activities.filter(a=>a.dealId===d.id);
+  const days=daysSince(lastTouch(d));
+  let score=Math.max(0,40-Math.round(days*40/14)); // Reaktionszeit: je frischer der letzte Kontakt, desto mehr Punkte
+  score+=Math.min(40,acts.length*10);              // Engagement: Anzahl verknüpfter Aktivitäten
+  score+=d.value?20:0;                             // Rate-/Wert-Passung: Tagessatz hinterlegt
+  return Math.max(0,Math.min(100,score));
+}
+function scoreColor(s){return s>=70?"var(--green)":s>=40?"#e6a417":"var(--red)";}
+
+/* ---- Stunden-/Zeiterfassung je Deal (nutzt bestehende Aktivitäten-Tabelle, kein neues Schema nötig) ---- */
+function dealTimeEntries(id){return db.activities.filter(a=>a.type==="timesheet"&&a.dealId===id).sort((a,b)=>(b.dueDate||"").localeCompare(a.dueDate||""));}
+function parseHoursFromTitle(t){const m=(t||"").match(/^(\d+(?:[.,]\d+)?)\s*h\b/i);return m?parseFloat(m[1].replace(",",".")):0;}
+function dealHoursSum(id){return Math.round(dealTimeEntries(id).reduce((s,a)=>s+parseHoursFromTitle(a.title),0)*100)/100;}
+function timesheetForm(dealId){const d=byId(db.deals,dealId);if(!d)return;
+  const entries=dealTimeEntries(dealId),sum=dealHoursSum(dealId);
+  openModal(`
+    <div class="mh"><h3>⏱ Stunden — ${esc(d.title)}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="kv"><div class="k">Gesamt erfasst</div><div class="v"><b>${sum.toLocaleString("de-DE")} h</b></div></div>
+      ${entries.length?`<div class="detail-sec"><h4>Einträge</h4>${entries.map(a=>`<div class="kv"><div class="v">${a.dueDate?new Date(a.dueDate).toLocaleDateString("de-DE"):"—"} · ${esc(a.title)}</div><div class="right"><span style="cursor:pointer;color:var(--red)" onclick="delActivity('${a.id}');timesheetForm('${dealId}')" title="Löschen">✕</span></div></div>`).join("")}</div>`:""}
+      <div class="detail-sec"><h4>Neuer Eintrag</h4>
+      <form id="tf" onsubmit="return saveTimesheet(event,'${dealId}')">
+        <div class="row2"><div class="fld"><label>Datum</label><input name="date" type="date" value="${inDays(0)}"></div>
+          <div class="fld"><label>Stunden *</label><input name="hours" type="number" step="0.25" min="0.25" required></div></div>
+        <div class="fld"><label>Tätigkeit</label><input name="desc" placeholder="z. B. Onsite-Support"></div>
+      </form></div>
+    </div>
+    <div class="mf"><button class="btn sec" onclick="closeModal()">Schließen</button>
+      <button class="btn" onclick="document.getElementById('tf').requestSubmit()">Eintragen</button></div>`);}
+function saveTimesheet(e,dealId){e.preventDefault();const f=Object.fromEntries(new FormData(e.target));
+  const hours=parseFloat((f.hours||"0").replace(",",".")||"0")||0;if(hours<=0)return false;
+  db.activities.push({id:uid(),createdAt:Date.now(),done:true,type:"timesheet",
+    title:hours+"h"+(f.desc?" – "+f.desc:""),dueDate:f.date||inDays(0),contactId:"",dealId,notes:f.desc||""});
+  scheduleSave();timesheetForm(dealId);renderAll();toast("Stunden erfasst");return false;}
+
 let compSort={key:"name",dir:1};
 function setCompSort(k){if(compSort.key===k)compSort.dir*=-1;else compSort={key:k,dir:1};renderAll();}
 function viewCompanies(){
@@ -959,12 +1016,15 @@ function viewDeals(){
       ${items.map(d=>`<div class="card ${sel.has(d.id)?"selrow":""} ${d.done?"donecard":""}" draggable="true" ondragstart="dragStart(event,'${d.id}')" onclick="openDeal('${d.id}')">
         <span style="float:right">${selCheckbox(d.id)}</span>
         <div class="t">${esc(d.title)}</div>
-        <div class="v">${eur(d.value)}</div>
+        <div class="v">${eur(d.value)} <span class="pill" style="background:${scoreColor(dealScore(d))}22;color:${scoreColor(dealScore(d))};font-size:11px;margin-left:4px" title="Lead-Score (Reaktionszeit + Aktivität + Rate)">★ ${dealScore(d)}</span></div>
         <div class="c">${esc(companyName(d.companyId)||contactName(d.contactId)||"—")}</div>
         ${d.closeDate?`<div class="c">◷ ${new Date(d.closeDate).toLocaleDateString("de-DE")}</div>`:""}
+        ${dealHoursSum(d.id)?`<div class="c">⏱ ${dealHoursSum(d.id)}h erfasst</div>`:""}
         <div onclick="event.stopPropagation()" style="margin-top:8px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:6px">
           <label style="color:${d.done?"var(--green)":"var(--muted)"};font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px"><input type="checkbox" style="width:15px;height:15px;accent-color:var(--green);cursor:pointer" ${d.done?"checked":""} onclick="event.stopPropagation();toggleDealDone('${d.id}',this.checked)"> ${d.done?tr("c_done")+" ✓":tr("c_done")}</label>
           <span onclick="event.stopPropagation();followUpDeal('${d.id}')" title="Follow-up planen (Profil nachfassen)" style="cursor:pointer;color:var(--brand);font-weight:600;white-space:nowrap">↻ Follow-up</span></div>
+        <div onclick="event.stopPropagation()" style="margin-top:6px;font-size:12px;text-align:right">
+          <span onclick="event.stopPropagation();timesheetForm('${d.id}')" title="Stunden erfassen" style="cursor:pointer;color:var(--brand);font-weight:600;white-space:nowrap">⏱ Stunden</span></div>
       </div>`).join("")}
     </div>`;}).join("")}</div>`:'<div class="empty"><div class="big">◆</div>Alle Spalten ausgeblendet.</div>'}`;
 }
@@ -1405,7 +1465,7 @@ async function pipelineWriteApply(){
 // ---- Field definitions per entity ----
 const IMPORT_FIELDS={
   contacts:[["firstName","Vorname"],["lastName","Nachname"],["fullName","Name (voll, wird getrennt)"],
-    ["company","Firma (Name)"],["position","Position"],["email","E-Mail"],["phone","Telefon"],["tags","Tags"],["notes","Notizen"]],
+    ["company","Firma (Name)"],["position","Position"],["email","E-Mail"],["phone","Telefon"],["tags","Tags"],["notes","Notizen"],["linkedinUrl","LinkedIn-Profil (optional)"]],
   companies:[["name","Firmenname"],["industry","Branche"],["website","Website"],["phone","Telefon"],["address","Adresse"],["notes","Notizen"]],
   deals:[["title","Titel"],["value","Wert (€)"],["stage","Phase"],["company","Firma (Name)"],["contact","Kontakt (Name)"],["closeDate","Abschlussdatum"],["notes","Notizen"]],
   activities:[["title","Titel"],["type","Typ"],["dueDate","Fällig am"],["contact","Kontakt (Name)"],["notes","Notizen"]],
@@ -1420,12 +1480,13 @@ const GUESS={firstName:["vorname","first","given"],lastName:["nachname","last","
   industry:["branche","industry","sektor"],website:["web","url","homepage","seite"],address:["adresse","address","anschrift","ort","straße","strasse"],
   title:["titel","title","betreff","bezeichnung","name"],value:["wert","value","betrag","umsatz","summe","preis","amount"],
   stage:["phase","stage","status"],contact:["kontakt","contact","ansprech","person"],
-  closeDate:["abschluss","close","datum","date"],dueDate:["fällig","faellig","due","datum","date","termin"],type:["typ","type","art"]};
+  closeDate:["abschluss","close","datum","date"],dueDate:["fällig","faellig","due","datum","date","termin"],type:["typ","type","art"],
+  linkedinUrl:["linkedin","profile url","url"]};
 
 let imp={type:"contacts",headers:[],rows:[],map:{},hasHeader:true};
 
 function importWizard(){
-  imp={type:(state.view in IMPORT_FIELDS?state.view:"contacts"),headers:[],rows:[],map:{},fileInfo:[],hasHeader:true};
+  imp={type:(state.view in IMPORT_FIELDS?state.view:"contacts"),headers:[],rows:[],map:{},fileInfo:[],hasHeader:true,isLinkedin:false};
   openModal(`
     <div class="mh"><h3>Daten importieren</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="mb">
@@ -1435,6 +1496,7 @@ function importWizard(){
       <div class="fld"><label>Dateien (CSV, TSV oder Excel .xlsx) — mehrere möglich</label>
         <input type="file" id="impFile" accept=".csv,.tsv,.txt,.xlsx" multiple onchange="handleImportFiles(this.files)"></div>
       <div class="muted" style="font-size:12.5px">Mehrere Dateien werden zusammengeführt (gleiche Spalten werden per Name erkannt). Erste Zeile = Spaltenüberschriften. Firmen werden bei Kontakten/Deals automatisch angelegt und verknüpft.</div>
+      <div class="muted" style="font-size:12.5px">🔗 LinkedIn-Kontakte: LinkedIn → Einstellungen &amp; Datenschutz → „Abrufen einer Kopie deiner Daten" → Verbindungen (CSV) exportieren, dann hier als Kontakte importieren — wird automatisch erkannt und mit Tag „LinkedIn" versehen.</div>
       <div id="impStep2"></div>
     </div>
     <div class="mf"><button class="btn sec" onclick="closeModal()">Abbrechen</button>
@@ -1474,9 +1536,10 @@ async function handleImportFiles(fileList){
       }
     }
     if(!imp.headers.length)throw new Error("Keine lesbaren Daten gefunden");
-    autoMap();renderMapping();
+    detectLinkedin();autoMap();renderMapping();
   }catch(e){step2.innerHTML=`<div class="pill" style="background:#fdeceb;color:var(--red);padding:8px 12px;display:block">Fehler: ${esc(e.message)}</div>`;}
 }
+function detectLinkedin(){const h=imp.headers.map(normH);imp.isLinkedin=h.includes("url")&&h.some(x=>x.indexOf("connected on")>=0);}
 function autoMap(){imp.map={};const used=new Set();
   for(const [field] of IMPORT_FIELDS[imp.type]){
     const keys=GUESS[field]||[field];
@@ -1531,10 +1594,14 @@ function runImport(){
       let fn=cell(r,"firstName"),ln=cell(r,"lastName");
       if(!fn&&!ln&&imp.map.fullName!=null){const parts=cell(r,"fullName").split(/\s+/);fn=parts.shift()||"";ln=parts.join(" ");}
       if(!fn&&!ln)continue;
+      const liUrl=cell(r,"linkedinUrl");let notes=cell(r,"notes");
+      if(liUrl)notes=(notes?notes+"\n":"")+"LinkedIn: "+liUrl;
+      const tags=cell(r,"tags").split(/[,;]/).map(x=>x.trim()).filter(Boolean);
+      if(imp.isLinkedin&&!tags.includes("LinkedIn"))tags.push("LinkedIn");
       db.contacts.push({id:uid(),createdAt:Date.now(),firstName:fn,lastName:ln,
         companyId:findOrCreateCompany(cell(r,"company")),position:cell(r,"position"),
         email:cell(r,"email"),phone:cell(r,"phone"),
-        tags:cell(r,"tags").split(/[,;]/).map(x=>x.trim()).filter(Boolean),notes:cell(r,"notes")});count++;
+        tags,notes});count++;
     }else if(t==="companies"){
       const name=cell(r,"name");if(!name)continue;
       db.companies.push({id:uid(),createdAt:Date.now(),name,industry:cell(r,"industry"),
