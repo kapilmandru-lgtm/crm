@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="author" content="Rechtsrecherche">
+<meta name="description" content="Duerfen rumaenische Gesellschaften in Thailand Eigentumswohnungen kaufen? Rechtslage, Verfahren, Kosten und Fallstricke.">
+<title>Thai-Condo auf rumänische Firma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  :root{
+    --paper:#EEF1EB;
+    --surface:#FAFBF8;
+    --surface-2:#E4E9E1;
+    --ink:#18211C;
+    --ink-2:#4D5A53;
+    --ink-3:#77857D;
+    --rule:#CFD7CC;
+    --rule-strong:#AEBAB2;
+    --jade:#1C5F4D;
+    --jade-soft:#DCE9E3;
+    --seal:#9E2B22;
+    --seal-soft:#F2DFDC;
+    --gold:#8A6D22;
+    --gold-soft:#EFE6CC;
+    --shadow:0 1px 0 rgba(24,33,28,.06);
+
+    --f-display:"Spectral",Georgia,"Times New Roman",serif;
+    --f-body:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
+    --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#121714;
+      --surface:#1A211D;
+      --surface-2:#232B26;
+      --ink:#E5EBE5;
+      --ink-2:#A3B0A8;
+      --ink-3:#7E8C84;
+      --rule:#2B3530;
+      --rule-strong:#3D4A43;
+      --jade:#5FC0A2;
+      --jade-soft:#17302A;
+      --seal:#E2857A;
+      --seal-soft:#33201E;
+      --gold:#D3B063;
+      --gold-soft:#2E2718;
+      --shadow:0 1px 0 rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#121714;
+    --surface:#1A211D;
+    --surface-2:#232B26;
+    --ink:#E5EBE5;
+    --ink-2:#A3B0A8;
+    --ink-3:#7E8C84;
+    --rule:#2B3530;
+    --rule-strong:#3D4A43;
+    --jade:#5FC0A2;
+    --jade-soft:#17302A;
+    --seal:#E2857A;
+    --seal-soft:#33201E;
+    --gold:#D3B063;
+    --gold-soft:#2E2718;
+    --shadow:0 1px 0 rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--f-body);
+    font-size:16px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--jade-soft);color:var(--ink)}
+  a{color:var(--jade);text-underline-offset:.18em;text-decoration-thickness:.06em}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--jade);outline-offset:3px;border-radius:2px}
+
+  /* ---- masthead ---- */
+  .masthead{
+    border-bottom:1px solid var(--rule-strong);
+    background:var(--surface);
+  }
+  .masthead-in{
+    max-width:86rem;margin-inline:auto;padding:2.6rem 1.5rem 2.2rem;
+    display:grid;gap:1.1rem;
+  }
+  .eyebrow{
+    font-family:var(--f-mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-3);display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;
+  }
+  h1{
+    font-family:var(--f-display);font-weight:600;
+    font-size:clamp(1.95rem,1.2rem + 2.6vw,3.1rem);
+    line-height:1.12;letter-spacing:-.015em;margin:0;text-wrap:balance;max-width:22ch;
+  }
+  .standfirst{
+    font-family:var(--f-display);font-size:clamp(1.02rem,.96rem + .3vw,1.2rem);
+    color:var(--ink-2);max-width:62ch;margin:0;line-height:1.5;
+  }
+
+  /* ---- verdict board ---- */
+  .verdict{
+    max-width:86rem;margin:0 auto;padding:2rem 1.5rem 0;
+  }
+  .board{
+    display:grid;gap:1px;background:var(--rule);
+    border:1px solid var(--rule);border-radius:3px;overflow:hidden;
+  }
+  @media (min-width:760px){.board{grid-template-columns:repeat(3,1fr)}}
+  .verdict-cell{
+    background:var(--surface);padding:1.3rem 1.35rem 1.45rem;
+    display:grid;gap:.45rem;align-content:start;
+  }
+  .verdict-cell.yes{border-top:3px solid var(--jade)}
+  .verdict-cell.no{border-top:3px solid var(--seal)}
+  .verdict-cell.cond{border-top:3px solid var(--gold)}
+  .verdict-tag{
+    font-family:var(--f-mono);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase;font-weight:500;
+  }
+  .yes .verdict-tag{color:var(--jade)}
+  .no .verdict-tag{color:var(--seal)}
+  .cond .verdict-tag{color:var(--gold)}
+  .verdict-h{font-family:var(--f-display);font-size:1.2rem;font-weight:600;line-height:1.25;margin:0}
+  .verdict-p{margin:0;font-size:.92rem;color:var(--ink-2)}
+
+  /* ---- document grid with margin citations ---- */
+  .doc{padding:0 1.5rem 4rem;display:grid;gap:0}
+  .row{
+    max-width:86rem;margin-inline:auto;width:100%;
+    display:grid;grid-template-columns:minmax(0,1fr);gap:.35rem;
+    padding:1.4rem 0;
+  }
+  @media (min-width:1000px){
+    .row{grid-template-columns:13.5rem minmax(0,66ch);column-gap:3rem;justify-content:center}
+  }
+  .cite{
+    font-family:var(--f-mono);font-size:.72rem;line-height:1.55;color:var(--ink-3);
+    letter-spacing:.01em;
+  }
+  @media (min-width:1000px){
+    .cite{text-align:right;padding-top:.42rem;border-right:1px solid var(--rule);padding-right:1rem;
+          margin-right:-2rem;position:sticky;top:1.5rem;align-self:start}
+  }
+  .cite b{display:block;color:var(--ink-2);font-weight:500}
+  .col{min-width:0}
+  .col > * + *{margin-top:.9rem}
+
+  h2{
+    font-family:var(--f-display);font-weight:600;font-size:1.55rem;line-height:1.2;
+    letter-spacing:-.01em;margin:0;text-wrap:balance;
+  }
+  .rule-row{border-top:1px solid var(--rule-strong);padding-top:1.9rem}
+  h3{
+    font-family:var(--f-body);font-weight:600;font-size:1rem;margin:0;letter-spacing:-.005em;
+  }
+  p{margin:0;max-width:66ch}
+  .lede{font-family:var(--f-display);font-size:1.08rem;color:var(--ink-2);line-height:1.55}
+  .sec-no{
+    font-family:var(--f-mono);font-size:.72rem;color:var(--jade);letter-spacing:.12em;
+    text-transform:uppercase;display:block;margin-bottom:.3rem;
+  }
+  code,.mono{font-family:var(--f-mono);font-size:.88em}
+  code{background:var(--surface-2);padding:.08em .34em;border-radius:2px}
+
+  ul,ol{margin:0;padding-left:1.25rem}
+  li{margin-top:.42rem;max-width:64ch}
+  li::marker{color:var(--ink-3)}
+  ol.statute{list-style:none;padding-left:0;counter-reset:s}
+  ol.statute li{
+    counter-increment:s;position:relative;padding-left:2.6rem;margin-top:.75rem;
+  }
+  ol.statute li::before{
+    content:"(" counter(s) ")";position:absolute;left:0;top:.06em;
+    font-family:var(--f-mono);font-size:.8rem;color:var(--jade);
+  }
+  ol.statute li.key{
+    background:var(--jade-soft);border-radius:3px;padding:.7rem .9rem .7rem 2.9rem;margin-left:-.9rem;
+  }
+  ol.statute li.key::before{left:.9rem;top:.76rem}
+
+  blockquote{
+    margin:0;padding:.9rem 1.1rem;background:var(--surface);border-left:2px solid var(--jade);
+    font-family:var(--f-display);font-style:italic;color:var(--ink-2);border-radius:0 3px 3px 0;
+  }
+
+  .panel{
+    background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:1.15rem 1.25rem;
+    display:grid;gap:.6rem;
+  }
+  .panel.warn{background:var(--seal-soft);border-color:var(--seal)}
+  .panel.warn h3{color:var(--seal)}
+  .panel.note{background:var(--gold-soft);border-color:var(--gold)}
+  .panel.note h3{color:var(--gold)}
+  .panel p, .panel li{color:var(--ink-2)}
+  .panel.warn p,.panel.warn li,.panel.note p,.panel.note li{color:var(--ink)}
+
+  /* quota bar */
+  .quota{display:grid;gap:.5rem;margin-top:1.1rem}
+  .quota-track{display:flex;height:2.6rem;border:1px solid var(--rule-strong);border-radius:3px;overflow:hidden}
+  .quota-a{width:49%;background:var(--jade);color:#fff;display:grid;place-items:center;
+           font-family:var(--f-mono);font-size:.76rem;letter-spacing:.06em}
+  .quota-b{width:51%;background:var(--surface-2);color:var(--ink-2);display:grid;place-items:center;
+           font-family:var(--f-mono);font-size:.76rem;letter-spacing:.06em}
+  .quota-scale{position:relative;height:1.1rem;font-family:var(--f-mono);font-size:.68rem;color:var(--ink-3)}
+  .quota-scale span{position:absolute;top:0;white-space:nowrap}
+  .quota-scale .t0{left:0}
+  .quota-scale .t49{left:49%;transform:translateX(-50%);color:var(--jade)}
+  .quota-scale .t100{right:0}
+  .caption{font-size:.82rem;color:var(--ink-3);max-width:60ch}
+
+  /* tables */
+  .tw{overflow-x:auto;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:34rem;font-size:.9rem}
+  th,td{text-align:left;padding:.62rem .85rem;border-bottom:1px solid var(--rule);vertical-align:top}
+  thead th{
+    font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:500;background:var(--surface-2);
+  }
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.who{color:var(--ink-2)}
+
+  /* steps */
+  ol.steps{list-style:none;padding-left:0;counter-reset:st;display:grid;gap:0}
+  ol.steps li{
+    counter-increment:st;position:relative;padding:.85rem 0 .85rem 3.1rem;margin:0;
+    border-bottom:1px solid var(--rule);max-width:none;
+  }
+  ol.steps li:last-child{border-bottom:0}
+  ol.steps li::before{
+    content:counter(st,decimal-leading-zero);position:absolute;left:0;top:.95rem;
+    font-family:var(--f-mono);font-size:.74rem;color:var(--ink-3);letter-spacing:.05em;
+  }
+  ol.steps b{font-weight:600;display:block}
+  ol.steps span{color:var(--ink-2);font-size:.93rem}
+
+  /* pro/contra */
+  .split{display:grid;gap:1rem}
+  @media (min-width:700px){.split{grid-template-columns:1fr 1fr}}
+  .split .panel{align-content:start}
+
+  /* sources */
+  .sources{font-size:.86rem;color:var(--ink-2)}
+  .sources ul{list-style:none;padding-left:0;display:grid;gap:.5rem}
+  .sources li{margin:0;padding-left:0;max-width:none;line-height:1.45}
+  .sources .k{
+    font-family:var(--f-mono);font-size:.68rem;color:var(--ink-3);letter-spacing:.08em;
+    text-transform:uppercase;display:block;
+  }
+  footer.small{
+    max-width:86rem;margin:0 auto;padding:1.6rem 1.5rem 3rem;
+    border-top:1px solid var(--rule-strong);font-size:.82rem;color:var(--ink-3);
+  }
+  footer.small p{max-width:74ch}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>
+/* ---------- Druckfassung (A4) ---------- */
+@page{ size:A4; }
+@media print{
+  /* Helle Palette erzwingen, unabhaengig von der Systemeinstellung */
+  :root{
+    --paper:#FFFFFF;   --surface:#F6F9F4; --surface-2:#E8EEE5;
+    --ink:#141C18;     --ink-2:#404C46;   --ink-3:#6B776F;
+    --rule:#CBD4C8;    --rule-strong:#A6B2A8;
+    --jade:#175646;    --jade-soft:#E4EFE9;
+    --seal:#8E241C;    --seal-soft:#F7E6E3;
+    --gold:#6F5614;    --gold-soft:#F3EBD4;
+    --shadow:none;
+  }
+  html,body{background:#fff}
+  body{font-size:10.2pt;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  /* Seitenbreite uebernimmt die Papiermarge */
+  .masthead-in,.verdict,.row,footer.small{max-width:none;padding-left:0;padding-right:0;margin-inline:0}
+  .doc{padding-left:0;padding-right:0;padding-bottom:0}
+  .masthead{background:transparent;border-bottom:1pt solid var(--rule-strong)}
+  .masthead-in{padding-top:0;padding-bottom:7mm;gap:4mm}
+  .verdict{padding-top:6mm}
+
+  h1{font-size:23pt;max-width:26ch}
+  .standfirst{font-size:10.6pt}
+  .eyebrow{font-size:7.2pt}
+  h2{font-size:13.5pt}
+  h3{font-size:10.4pt}
+  .lede{font-size:10.6pt}
+  .sec-no{font-size:7.2pt}
+  .caption{font-size:8.2pt}
+  .cite{font-size:7.4pt;line-height:1.45}
+
+  /* Randspalte fuer Fundstellen beibehalten, auf Papierbreite getrimmt */
+  .row{grid-template-columns:32mm minmax(0,1fr);column-gap:8mm;justify-content:start;padding:5mm 0}
+  .cite{position:static;text-align:right;border-right:.75pt solid var(--rule);
+        padding-right:4mm;padding-top:1.2mm;margin-right:0}
+  .rule-row{padding-top:6mm}
+
+  .board{grid-template-columns:repeat(3,1fr)}
+  .verdict-cell{padding:3.4mm 4mm 4mm;gap:1.6mm}
+  .verdict-h{font-size:10.6pt}
+  .verdict-p{font-size:8.4pt}
+  .verdict-tag{font-size:7pt}
+  .split{grid-template-columns:1fr 1fr;gap:5mm}
+
+  .tw{overflow:visible}
+  table{min-width:0;font-size:8.6pt}
+  th,td{padding:1.6mm 2.4mm}
+  thead th{font-size:6.8pt}
+
+  /* Umbrueche */
+  .panel,.verdict-cell,blockquote,.quota,.tw,ol.steps li,ol.statute li,.sources li{break-inside:avoid}
+  h1,h2,h3,.sec-no{break-after:avoid}
+  .board{break-inside:avoid}
+  p,li{orphans:2;widows:2}
+
+  /* Quellen im Druck mit ausgeschriebener URL */
+  a{color:var(--jade);text-decoration:none}
+  .sources a::after{content:" (" attr(href) ")";font-family:var(--f-mono);font-size:6.6pt;
+                    color:var(--ink-3);word-break:break-all}
+  footer.small{padding:5mm 0 0;border-top:1pt solid var(--rule-strong)}
+}
+</style>
+
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-in">
+    <div class="eyebrow">
+      <span>Rechtsrecherche</span>
+      <span>Rumänien → Thailand</span>
+      <span>Stand: 3. September 2026</span>
+    </div>
+    <h1>Darf eine rumänische Firma in Thailand eine Wohnung kaufen?</h1>
+    <p class="standfirst">Ja — eine Gesellschaft rumänischen Rechts kann Volleigentum an einer thailändischen Eigentumswohnung erwerben und direkt im Chanote-Titel eingetragen werden. Der thailändische Staat erlaubt das ausdrücklich, knüpft es aber an drei harte Bedingungen. An Grundstücken scheitert es dagegen praktisch immer.</p>
+  </div>
+</header>
+
+<section class="verdict" aria-label="Kurzantwort">
+  <div class="board">
+    <div class="verdict-cell yes">
+      <span class="verdict-tag">Erlaubt</span>
+      <p class="verdict-h">Eigentumswohnung (Condominium)</p>
+      <p class="verdict-p">Freehold, unbefristet, im eigenen Namen der Gesellschaft. Innerhalb der 49-%-Quote des Gebäudes und gegen Nachweis einer Devisen­einfuhr.</p>
+    </div>
+    <div class="verdict-cell no">
+      <span class="verdict-tag">Verboten</span>
+      <p class="verdict-h">Grundstück, Haus mit Land, Villa</p>
+      <p class="verdict-p">Ausländische juristische Personen dürfen kein Land erwerben. Es existiert kein Staatsvertrag zwischen Rumänien und Thailand, der das öffnen würde.</p>
+    </div>
+    <div class="verdict-cell cond">
+      <span class="verdict-tag">Lizenzpflichtig</span>
+      <p class="verdict-h">Vermietung der Wohnung</p>
+      <p class="verdict-p">Kaufen darf die Firma. Gewerblich vermieten nur mit Foreign Business Licence — der am häufigsten übersehene Punkt des ganzen Modells.</p>
+    </div>
+  </div>
+</section>
+
+<article class="doc">
+
+  <div class="row rule-row" style="border-top:0">
+    <aside class="cite">
+      <b>Condominium Act</b>
+      B.E. 2522 (1979),<br>zuletzt geändert durch<br>Act No. 4, B.E. 2551 (2008)
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 1 · Rechtsgrundlage</span>Section 19 macht keinen Unterschied zwischen Mensch und Firma</h2>
+      <p class="lede">Der Condominium Act zählt abschließend auf, wer als „Ausländer“ Wohnungseigentum halten darf. Entscheidend: Die Norm spricht durchgehend von <em>„aliens and juristic persons regarded by law as aliens“</em> — Ausländer <em>und</em> ausländische juristische Personen stehen gleichberechtigt nebeneinander.</p>
+      <p>Berechtigt sind fünf Gruppen:</p>
+      <ol class="statute">
+        <li>Ausländer mit Daueraufenthaltserlaubnis nach dem Einwanderungsgesetz.</li>
+        <li>Ausländer, die nach dem Investitionsförderungsgesetz einreisen dürfen.</li>
+        <li>Juristische Personen im Sinne der Sections 97 und 98 des Land Code, die nach thailändischem Recht registriert sind — also in Thailand gegründete Gesellschaften, die wegen ausländischer Mehrheit als ausländisch gelten.</li>
+        <li>Juristische Personen, die nach der Announcement of the National Executive Council No. 281 (24. November B.E. 2515) als ausländisch gelten <em>und</em> ein BOI-Förderzertifikat besitzen.</li>
+        <li class="key"><strong>Ausländer oder als ausländisch geltende juristische Personen, die Devisen nach Thailand einführen</strong>, Geld vom Baht-Konto einer im Ausland ansässigen Person abheben oder von einem Fremdwährungskonto abheben.</li>
+      </ol>
+      <p>Für eine rumänische S.R.L. oder S.A. ist <strong>Ziffer 5</strong> der Weg. Sie verlangt keine Registrierung in Thailand, keine Betriebsstätte, keinen thailändischen Gesellschafter und keinen Aufenthaltstitel — nur, dass der Kaufpreis in Fremdwährung aus dem Ausland eingeführt wird. Eine Gesellschaft mit Sitz in Bukarest kann damit unmittelbar als Eigentümerin im Grundbuch stehen, genauso wie es BVI-, Hongkong- oder Singapur-Gesellschaften seit Jahrzehnten tun.</p>
+      <blockquote>Die Wohnung ist juristisch eine Ausnahme im thailändischen Bodenrecht: Wer eine Einheit kauft, erwirbt zugleich einen ideellen Miteigentumsanteil am Grundstück — vermittelt über die Condominium Juristic Person. Das ist die einzige offene, seit 1979 praktizierte Form, in der Ausländer legal an thailändischem Boden beteiligt sind.</blockquote>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite">
+      <b>Sec. 19/2 Condominium Act</b>
+      Quote nach Fläche,<br>nicht nach Stückzahl
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 2 · Bedingung I</span>Die 49-Prozent-Quote</h2>
+      <p>In jedem registrierten Condominium-Gebäude dürfen alle ausländischen Eigentümer zusammen höchstens <strong>49 % der gesamten verkaufbaren Wohnfläche</strong> halten. Gemessen wird in Quadratmetern, nicht in Einheiten — eine 200-m²-Penthouse-Einheit verbraucht so viel Quote wie vier 50-m²-Studios.</p>
+      <div class="quota">
+        <div class="quota-track" role="img" aria-label="Balken: 49 Prozent der Wohnfläche stehen Ausländern offen, 51 Prozent sind Thai-Quote">
+          <div class="quota-a">49 % Foreign Quota</div>
+          <div class="quota-b">51 % Thai Quota</div>
+        </div>
+        <div class="quota-scale"><span class="t0">0 %</span><span class="t49">49 %</span><span class="t100">100 %</span></div>
+      </div>
+      <p class="caption">Anteil an der Gesamtwohnfläche eines Gebäudes. Die rumänische Gesellschaft zählt in denselben 49-%-Topf wie jeder ausländische Privatkäufer.</p>
+      <p>Ist die Quote ausgeschöpft, verweigert das Land Office die Umschreibung — ohne Ermessen. Deshalb gehört die <strong>Bescheinigung der Hausverwaltung (Condominium Juristic Person)</strong> über die freie Restquote in jede Due Diligence, ausgestellt auf das konkrete Kaufobjekt und möglichst taggleich zur Übertragung. Das Land Department hat Anfang 2026 ein digitales Quoten-Tracking eingeführt, das Gebäude nahe der Grenze in Echtzeit markiert; das reduziert Überraschungen, ersetzt die Bescheinigung aber nicht.</p>
+      <div class="panel note">
+        <h3>Häufige Falle beim Neubau</h3>
+        <p>Bauträger verkaufen „Foreign Quota“-Einheiten oft mit Aufpreis und reservieren sie vertraglich. Eine Reservierung ist keine Quote. Verbindlich ist erst die Eintragung — bis dahin gilt: Wer zuerst am Land Office ist, bekommt die Fläche.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite">
+      <b>Sec. 19(5) i. V. m. Sec. 19/1</b>
+      Foreign Exchange<br>Transaction Form (FET),<br>früher „Thor Tor 3“
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 3 · Bedingung II</span>Der Geldweg muss dokumentiert sein</h2>
+      <p>Der Kaufpreis muss <strong>in Fremdwährung von außerhalb Thailands</strong> überwiesen und erst in Thailand in Baht gewechselt werden. Eine Zahlung aus einem bereits bestehenden Baht-Guthaben qualifiziert nicht.</p>
+      <ul>
+        <li><strong>Ab USD 50.000</strong> (oder Gegenwert) stellt die empfangende thailändische Bank das <em>Foreign Exchange Transaction Form</em> aus und meldet den Vorgang der Bank of Thailand. Das Original geht ans Land Office.</li>
+        <li><strong>Unter USD 50.000</strong> tritt ein Credit Advice oder ein Bankbestätigungsschreiben an die Stelle des FET; das Land Department akzeptiert beides.</li>
+        <li>Das Dokument muss <strong>den Namen der rumänischen Gesellschaft</strong> als Absenderin oder Empfängerin ausweisen und als Verwendungszweck den Erwerb einer Eigentumswohnung nennen — idealerweise mit Projektname und Einheitsnummer.</li>
+      </ul>
+      <div class="panel warn">
+        <h3>Zahlung durch Dritte ist der klassische Deal-Breaker</h3>
+        <p>Überweist der Geschäftsführer privat, die Muttergesellschaft oder ein Gesellschafter, weicht der Name auf dem FET vom Käufernamen im Kaufvertrag ab — das Land Office lehnt die Eintragung in der Foreign Quota dann regelmäßig ab. Die Mittel müssen vom Konto der erwerbenden Gesellschaft kommen. Innerkonzernliche Finanzierung vorher als Darlehen oder Kapitaleinlage sauber dokumentieren, damit die Bank sie im KYC durchwinkt.</p>
+      </div>
+      <p>Der zweite Grund, warum das FET zählt: Es ist die Eintrittskarte für die spätere <strong>Rückführung des Verkaufserlöses</strong> ins Ausland. Ohne dokumentierten Zufluss wird der Abfluss zur Übung.</p>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite">
+      <b>Sec. 86 Land Code</b>
+      B.E. 2497 (1954)<br><br>
+      <b>Sec. 96 bis</b><br>THB 40 Mio., max. 1 Rai<br>(1.600 m²)
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 4 · Bedingung III</span>Wo die Tür zubleibt: Land</h2>
+      <p>Section 86 des Land Code lautet im Kern: <em>Ausländer dürfen Land nur aufgrund eines Staatsvertrags erwerben, der ihnen das Recht auf Immobilieneigentum einräumt.</em> Der letzte solche Reziprozitätsvertrag wurde <strong>1970 beendet</strong>. Die Ausnahme steht damit zwar im Gesetz, führt aber ins Leere — für Rumänien wie für alle anderen Staaten.</p>
+      <p>Was Ihnen deshalb <strong>nicht</strong> offensteht:</p>
+      <ul>
+        <li><strong>Grundstück, Haus oder Villa mit Land</strong> auf den Namen der rumänischen Gesellschaft. Ohne Ausnahme.</li>
+        <li><strong>Section 96 bis</strong> — Landerwerb bis 1 Rai für Wohnzwecke gegen eine Investition von THB 40 Mio. — gilt nur für <em>natürliche</em> Personen, erfordert die Genehmigung des Innenministers und wird in der Praxis kaum erteilt.</li>
+        <li><strong>US Treaty of Amity (1966)</strong> — die einzige echte Sonderstellung im thailändischen Wirtschaftsrecht — steht ausschließlich US-Gesellschaften offen und erlaubt auch diesen keinen Landerwerb. Ein EU- oder rumänisches Gegenstück existiert nicht.</li>
+      </ul>
+      <div class="panel warn">
+        <h3>Und die Thai-Gesellschaft mit 51 % thailändischen Anteilseignern?</h3>
+        <p>Das ist der Klassiker — und 2025/26 der riskanteste Weg überhaupt. Eine thailändische Gesellschaft darf Land halten; halten die thailändischen Gesellschafter ihre Anteile aber nur pro forma, ist es eine verbotene Nominee-Struktur (Land Code Sections 96, 113; Foreign Business Act).</p>
+        <p>Die Durchsetzung ist massiv verschärft worden: 2025 hat das Kabinett das Innenministerium und dreizehn Behörden auf Nominee-Landbesitz angesetzt, DSI, Land Department, DBD und AMLO arbeiten in gemeinsamen Operationen (u. a. auf Koh Samui und Phuket). In einem Phuketer Verfahren um rund 60 Gesellschaften wurden 23 Angeklagte zu je zehn Jahren Haft verurteilt. Seit 1. Januar 2026 verlangt das DBD bei jeder Neugründung einen Mittelherkunftsnachweis der thailändischen Gesellschafter. Ein eigenständiges Nominee-Gesetz mit rückwirkender Nichtigkeit ist in Vorbereitung.</p>
+      </div>
+      <div class="panel">
+        <h3>Legale Alternativen für Land</h3>
+        <ul>
+          <li><strong>Registriertes Erbbaurecht/Leasehold, max. 30 Jahre</strong> (Civil and Commercial Code). Über drei Jahre nur mit Eintragung am Land Office wirksam. Verlängerungsversprechen wirken nur schuldrechtlich zwischen den Parteien — der Oberste Gerichtshof hat „60- oder 90-Jahres-Leases“ wiederholt kassiert; gegenüber einem Erwerber des Grundstücks sind sie wertlos.</li>
+          <li><strong>BOI-Förderung</strong>: Eine geförderte Gesellschaft darf Land für die geförderte Tätigkeit erwerben; ab THB 50 Mio. eingezahltem Kapital zusätzlich bis 5 Rai für Büro und bis 10 Rai für Wohnraum von Führungskräften und Experten. Das BOI hat die Landprivilegien allerdings für bestimmte Tätigkeitskategorien mit ausländischer Mehrheit gestrichen.</li>
+          <li><strong>IEAT-Industriezonen</strong>: Landeigentum für ausländische Investoren mit Genehmigung der Industrial Estate Authority of Thailand — für Produktion, nicht für Wohnimmobilien.</li>
+          <li><strong>Gebäude ohne Grundstück</strong>: Ein Haus kann isoliert vom Boden erworben werden (getrennte Bauurkunde), der Boden bleibt geleast. Konstruktiv möglich, in der Praxis schwer wieder zu verkaufen.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite">
+      <b>Legalisation</b>
+      Derzeit konsularisch;<br>Apostille ab<br>28. Februar 2027
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 5 · Verfahren</span>Vom Beschluss in Bukarest bis zum Chanote</h2>
+      <ol class="steps">
+        <li><b>Objekt- und Quotenprüfung</b><span>Bescheinigung der Hausverwaltung über freie Foreign Quota, Titelrecherche am Land Office, Prüfung von Bau- und Betriebsgenehmigungen, offene Verwaltungskosten des Vorbesitzers.</span></li>
+        <li><b>Gesellschaftsbeschluss</b><span>Gesellschafter- bzw. Verwaltungsratsbeschluss über Erwerb und Kaufpreis, Bevollmächtigung eines Vertreters für Thailand.</span></li>
+        <li><b>Corporate Documents beschaffen</b><span>Certificat constatator (ONRC), Gründungsurkunde und Satzung, Gesellschafterliste, Beschluss, Vollmacht, Passkopien der Geschäftsführer.</span></li>
+        <li><b>Beglaubigen und legalisieren</b><span>Notarielle Beglaubigung in Rumänien, anschließend — bis Ende Februar 2027 — Legalisation über das rumänische Außenministerium und die thailändische Botschaft in Bukarest. Thailand hat die Beitrittsurkunde zum Haager Apostille-Übereinkommen am 30. Juni 2026 hinterlegt; ab 28. Februar 2027 genügt die Apostille.</span></li>
+        <li><b>Thai-Übersetzung</b><span>Beglaubigte Übersetzung ins Thailändische; einzelne Land Offices akzeptieren Englisch, verlassen sollte man sich darauf nicht.</span></li>
+        <li><b>Kaufvertrag und Anzahlung</b><span>Sale &amp; Purchase Agreement, üblicherweise mit Rücktrittsrecht für den Fall, dass die Foreign Quota bis zum Übertragungstermin nicht verfügbar ist.</span></li>
+        <li><b>Devisenüberweisung</b><span>Vom Konto der Gesellschaft, in EUR oder USD, mit Verwendungszweck. FET bzw. Credit Advice bei der thailändischen Bank anfordern — nicht erst am Übertragungstag.</span></li>
+        <li><b>Debt-free Letter</b><span>Bestätigung der Hausverwaltung, dass keine Rückstände bei Common-Area-Fee und Sinking Fund bestehen. Ohne dieses Papier keine Umschreibung.</span></li>
+        <li><b>Übertragung am Land Office</b><span>Vorlage aller Unterlagen, Zahlung von Gebühren und Steuern, Eintragung der Gesellschaft auf der Rückseite des Chanote und Ausstellung der Eigentumsurkunde für die Einheit.</span></li>
+      </ol>
+      <p class="caption">Realistische Dauer bei sauberer Vorbereitung: sechs bis zehn Wochen, davon der Löwenanteil auf Legalisation und Übersetzung.</p>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite">
+      <b>Land &amp; Building Tax Act</b>
+      B.E. 2562 (2019)<br><br>
+      Die alte House &amp; Land Tax<br>von 12,5 % ist seit 2020<br>abgeschafft — viele<br>Online-Ratgeber sind<br>an dieser Stelle veraltet.
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 6 · Kosten</span>Was beim Erwerb und danach anfällt</h2>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr><th>Position</th><th>Satz</th><th>Bemessung</th><th>Trägt üblicherweise</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Transfer Fee</td><td class="num">2,0 %</td><td>amtlicher Schätzwert</td><td class="who">verhandelbar, oft 50/50</td></tr>
+            <tr><td>Specific Business Tax</td><td class="num">3,3 %</td><td>höherer aus Kauf- oder Schätzwert; nur bei Verkauf binnen 5 Jahren</td><td class="who">Verkäufer</td></tr>
+            <tr><td>Stempelsteuer</td><td class="num">0,5 %</td><td>entfällt, wenn SBT anfällt</td><td class="who">Verkäufer</td></tr>
+            <tr><td>Quellensteuer</td><td class="num">1,0 %</td><td>bei Gesellschaft als Verkäuferin</td><td class="who">Verkäufer</td></tr>
+            <tr><td>Land &amp; Building Tax, jährlich</td><td class="num">0,02–0,10 %</td><td>Wohnnutzung ohne Hauptwohnsitz-Freibetrag, gestaffelt ab THB 50 / 75 / 100 Mio.</td><td class="who">Eigentümerin</td></tr>
+            <tr><td>Common Area Fee</td><td class="num">THB 35–90</td><td>je m² und Monat, projektabhängig</td><td class="who">Eigentümerin</td></tr>
+            <tr><td>Sinking Fund</td><td class="num">THB 500–1.000</td><td>je m², einmalig beim Ersterwerb</td><td class="who">Käuferin</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">Gesamtkosten der Übertragung typischerweise 2,5 % bis rund 6,3 % des amtlichen Schätzwerts. Zeitlich befristete Gebührensenkungen gab es wiederholt, sie waren aber regelmäßig an thailändische Erwerber und Preisobergrenzen geknüpft — die jeweils geltende Royal-Decree-Fassung prüfen.</p>
+      <div class="panel note">
+        <h3>Ein Punkt, den man vor Ort klären sollte</h3>
+        <p>Die Land &amp; Building Tax staffelt nach <em>tatsächlicher Nutzung</em>. Wohnnutzung liegt bei 0,02–0,10 %; wird die Einheit als gewerblich genutzt eingestuft, greifen 0,3–0,7 % — das Fünfzehn- bis Fünfunddreißigfache. Die Einstufung nimmt die Gemeinde vor und sie fällt bei firmengehaltenen, vermieteten Einheiten nicht überall gleich aus. Für 2026 gibt es kein Erlass-Dekret, es gelten die vollen Sätze.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite">
+      <b>Foreign Business Act</b>
+      B.E. 2542 (1999),<br>Liste 3, Kategorie 21<br><br>
+      <b>DBA Rumänien–Thailand</b><br>gez. 26.06.1996,<br>in Kraft 03.04.1997
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 7 · Der eigentliche Haken</span>Kaufen ist erlaubt. Vermieten ist es nicht ohne Weiteres.</h2>
+      <p>Hier trennt sich die Theorie von den meisten Geschäftsmodellen. Der Condominium Act regelt <em>Eigentum</em>. Sobald die Gesellschaft die Wohnung <em>bewirtschaftet</em>, greift ein zweites Gesetz.</p>
+      <ul>
+        <li><strong>Foreign Business Act.</strong> Die Vermietung von Immobilien fällt unter Liste 3 Kategorie 21 (sonstige Dienstleistungen). Eine ausländische Gesellschaft braucht dafür eine <strong>Foreign Business Licence</strong> des Department of Business Development. Ohne Lizenz ist der Betrieb strafbewehrt.</li>
+        <li><strong>Quellensteuer.</strong> Mietzahlungen an eine ausländische Gesellschaft ohne thailändische Betriebsstätte unterliegen 15 % Quellensteuer; zahlt eine thailändische Gesellschaft die Miete, behält sie diese ein.</li>
+        <li><strong>Betriebsstättenrisiko.</strong> Wer laufend vermietet, verwaltet und abrechnet, begründet schnell eine Betriebsstätte — mit Registrierungs-, Buchführungs- und Körperschaftsteuerpflicht in Thailand.</li>
+        <li><strong>Kurzzeitvermietung.</strong> Vermietung unter 30 Tagen verstößt gegen den Hotel Act und häufig zusätzlich gegen die Hausordnung der Condominium Juristic Person. Die Kontrollen sind in den Tourismusprovinzen deutlich schärfer geworden.</li>
+        <li><strong>Doppelbesteuerung.</strong> Das Abkommen zwischen Rumänien und Thailand (unterzeichnet 26. Juni 1996, in Kraft seit 3. April 1997) weist Einkünfte aus unbeweglichem Vermögen dem Belegenheitsstaat zu — Thailand besteuert, Rumänien rechnet an bzw. stellt frei.</li>
+      </ul>
+      <div class="panel">
+        <h3>Praktische Konsequenz</h3>
+        <p>Für <strong>Eigennutzung, Konzern-Unterbringung oder reines Halten als Kapitalanlage</strong> ist das Firmenmodell unproblematisch. Für ein <strong>Vermietungsgeschäft</strong> ist es der falsche Aufsatzpunkt: Dann führt der Weg über eine thailändische Betriebsgesellschaft mit Foreign Business Licence oder BOI-Förderung — oder über einen lizenzierten thailändischen Property Manager, der im eigenen Namen vermietet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite">
+      <b>Abwägung</b>
+      Firma oder<br>Privatperson
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 8 · Struktur</span>Lohnt die Firma überhaupt?</h2>
+      <div class="split">
+        <div class="panel">
+          <h3 style="color:var(--jade)">Dafür</h3>
+          <ul>
+            <li><strong>Nachfolge.</strong> Gesellschaften sterben nicht. Kein thailändisches Erbverfahren, keine Frist zur Veräußerung durch nicht qualifizierte Erben.</li>
+            <li><strong>Exit über Anteile.</strong> Verkauft wird die Beteiligung statt der Immobilie — am Land Office findet keine Übertragung statt, die dortigen Gebühren fallen nicht an.</li>
+            <li><strong>Mehrere Investoren</strong> lassen sich über die Gesellschafterstruktur sauber abbilden.</li>
+            <li><strong>Haftungstrennung</strong> vom Privatvermögen.</li>
+            <li><strong>Investitionsschutz.</strong> Das Investitionsschutzabkommen Rumänien–Thailand (unterzeichnet 30. April 1993) erfasst eine als Investition gehaltene Immobilie.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3 style="color:var(--seal)">Dagegen</h3>
+          <ul>
+            <li><strong>Keine Quotenumgehung.</strong> Die Firma zählt in dieselben 49 %.</li>
+            <li><strong>Laufende Kosten</strong> für Bestand, Buchführung und Abschluss der Gesellschaft, auch bei Leerlauf.</li>
+            <li><strong>Mehr Papier beim Kauf</strong> und höhere Anforderungen an Legalisation und Bank-KYC.</li>
+            <li><strong>Käuferkreis beim Exit.</strong> Der Anteilskäufer übernimmt die gesamte Gesellschaftshistorie; viele Interessenten wollen die Wohnung, nicht die Firma — der Vorteil aus Punkt 2 relativiert sich im Preis.</li>
+            <li><strong>Steuerliche Gestaltungen kritisch prüfen.</strong> Die Aussage „Anteilsverkauf ist in Thailand steuerfrei“ kursiert im Netz als Gewissheit; sie hängt am Einzelfall und ist im aktuellen Nominee- und Transparenzklima kein Fundament für eine Struktur.</li>
+            <li><strong>Kein Visumsvorteil.</strong> Weder Kauf noch Firmenbeteiligung begründen ein Aufenthaltsrecht.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite">
+      <b>Reformstand</b>
+      Kabinettsbeschluss 2024,<br>bis September 2026<br>kein Gesetz
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 9 · Ausblick</span>Was sich ändern könnte — und was nicht</h2>
+      <ul>
+        <li><strong>Quote von 49 % auf 75 %.</strong> Das Kabinett hat 2024 eine Prüfung beauftragt, diskutiert wurden erhöhte Quoten in ausgewählten Zonen wie Phuket, Koh Samui, Pattaya und Chiang Mai. Bis heute liegt dem Parlament kein Gesetzentwurf vor; der Widerstand — auch im Senat — läuft über Souveränitäts- und Bezahlbarkeitsargumente. <strong>Es gilt unverändert 49 %.</strong></li>
+        <li><strong>Leasehold auf 99 Jahre.</strong> Parallel geprüft, ebenfalls nicht umgesetzt. Maximum bleiben 30 Jahre.</li>
+        <li><strong>EU–Thailand-Freihandelsabkommen.</strong> 15 von 24 Kapiteln sind vorläufig geschlossen, der Abschluss wird für Ende 2026 angestrebt. Immobilieneigentum ist kein Verhandlungsgegenstand — ein Abkommen wird an Section 86 Land Code nichts ändern.</li>
+        <li><strong>Apostille.</strong> Die einzige mit Datum feststehende Erleichterung: ab <strong>28. Februar 2027</strong> entfällt die konsularische Legalisation rumänischer Urkunden für Thailand.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="cite"><b>Kurzfassung</b></aside>
+    <div class="col">
+      <h2><span class="sec-no">Fazit</span>In einem Satz</h2>
+      <p class="lede">Der thailändische Staat erlaubt einer rumänischen Gesellschaft ausdrücklich den Erwerb von Volleigentum an einer Eigentumswohnung — direkt, ohne thailändischen Partner und ohne Präsenz im Land —, solange die 49-%-Quote des Gebäudes Platz lässt und der Kaufpreis nachweislich in Fremdwährung aus dem Ausland eingeführt wird. Land bleibt verschlossen, und die Vermietung ist ein eigenes, lizenzpflichtiges Thema.</p>
+    </div>
+  </div>
+
+  <div class="row rule-row sources">
+    <aside class="cite"><b>Quellen</b></aside>
+    <div class="col">
+      <h2><span class="sec-no">Belege</span>Verwendete Quellen</h2>
+      <ul>
+        <li><span class="k">Condominium Act · Section 19</span><a href="https://library.siam-legal.com/thai-law/condominium-act-ownership-sections-19-1-19-11/">Siam Legal Library — Condominium Act, Ownership (Sections 19/1–19/11)</a> · <a href="https://www.samuiforsale.com/law-texts/new-thailand-condominium-act-2008.html">Volltext Condominium Act (Fassung 2008)</a> · <a href="https://www.thailandlawonline.com/translations/condominium-law-thai-condo-act">Übersetzung des Condominium Act</a></li>
+        <li><span class="k">49-%-Quote</span><a href="https://terms.law/Thai/property/condo-foreign-quota.html">Thailand Condo Foreign Quota 2026 — die 49-%-Regel</a> · <a href="https://propertyscout.co.th/en/buying-renting-selling/49-foreign-ownership-quota-thailand/">PropertyScout — Foreign Ownership Quota</a> · <a href="https://thethaiger.com/thai-life/property/what-thailand-foreign-quota-means-for-buyers">The Thaiger — was die Quote für Käufer bedeutet</a></li>
+        <li><span class="k">Ausländische Gesellschaften als Eigentümerinnen</span><a href="https://thairesidential.com/owning-a-freehold-condominium-through-an-offshore-company/">Freehold-Condo über eine Offshore-Gesellschaft</a> · <a href="https://www.siam-legal.com/thailand-law/condominium-ownership-by-foreigners-2/">Siam Legal — Condominium Ownership by Foreigners</a> · <a href="https://www.samuiforsale.com/knowledge/practical-legal-for-condos.html">Rechtliche Aspekte des Condo-Erwerbs</a></li>
+        <li><span class="k">Land Code · Landverbot</span><a href="https://silklegal.com/the-law-of-the-land-in-thailand-a-comprehensive-guide-for-foreign-investors/">Silk Legal — The Law of the Land in Thailand</a> · <a href="https://www.nishimura.com/sites/default/files/images/80317.pdf">Nishimura &amp; Asahi — Thailand: Land</a> · <a href="https://library.siam-legal.com/thai-law/land-act-2497-limitations-of-foreigner-rights-sections-86-96/">Land Act B.E. 2497, Sections 86–96</a></li>
+        <li><span class="k">FET-Formular</span><a href="https://propertyscout.co.th/en/guides/the-fet-all-there-is-to-know-about-foreign-transaction-forms-in-thailand/">PropertyScout — alles zum FET</a> · <a href="https://www.samuiforsale.com/condominium/foreign-exchange-transaction-form.html">Foreign Exchange Transaction Form</a> · <a href="https://www.thailandlawonline.com/article-older-archive/condo-purchase-currency-fet-form-remittance">Devisentransfer beim Condo-Kauf</a></li>
+        <li><span class="k">Foreign Business Act · Vermietung</span><a href="https://www.siam-legal.com/thailand-law/thailand-foreign-business-license-rental-services/">Foreign Business Licence für Vermietungsdienstleistungen</a> · <a href="https://thailand.acclime.com/guides/foreign-business-license/">Acclime — Foreign Business Licence</a> · <a href="https://www.ilct.co.th/foreigners-operating-in-restricted-thai-businesses/">ILCT — Ausländer in beschränkten Geschäftsfeldern</a></li>
+        <li><span class="k">Nominee-Durchsetzung 2025/26</span><a href="https://www.nationthailand.com/business/property/40067708">The Nation — Nominee-Razzien und die Lücken im Immobilienrecht</a> · <a href="https://www.nationthailand.com/news/policy/40065978">The Nation — Großrazzia gegen Nominee-Firmen</a> · <a href="https://pdlegal.co.th/step-up-crackdown-and-enforcement-on-nominee-arrangements/">PDLegal — verschärfte Durchsetzung</a></li>
+        <li><span class="k">BOI · IEAT · Landprivilegien</span><a href="https://www.tilleke.com/insights/thailand-restricts-foreign-land-ownership-and-shareholding-for-certain-promoted-investments/">Tilleke &amp; Gibbins — Einschränkung der Landprivilegien</a> · <a href="https://belaws.com/thailand/land-ownership-rights/">Landeigentumsrechte geförderter Gesellschaften</a></li>
+        <li><span class="k">Steuern und Gebühren</span><a href="https://lexbangkok.com/land-building-tax-thailand-2026/">Land and Building Tax 2026 (B.E. 2569)</a> · <a href="https://taxsummaries.pwc.com/thailand/corporate/withholding-taxes">PwC Tax Summaries — Withholding Taxes Thailand</a> · <a href="https://www.forbesandpartners.com/thailand-property-transfer-cost-tax-breakdown/">Übertragungsgebühren und Steuern 2025/26</a></li>
+        <li><span class="k">Rumänien–Thailand · Abkommen</span><a href="https://s3-ap-northeast-1.amazonaws.com/dsa-library/Resources/3556/ASEAN_DTA_Thailand_Romania.pdf">Doppelbesteuerungsabkommen Thailand–Rumänien (Volltext, PDF)</a> · <a href="https://treaties.mfa.go.th/th/content/bit">Thailändisches Außenministerium — Übersicht der Investitionsschutzabkommen</a> · <a href="https://bangkok.mae.ro/en/node/778">Rumänische Botschaft Bangkok — bilateraler Rechtsrahmen</a></li>
+        <li><span class="k">Apostille</span><a href="https://www.mfa.go.th/en/content/thailand-accession-to-the-apostille-convention-2?cate=5d5bcb4e15e39c306000683e">Thailändisches Außenministerium — Beitritt zum Apostille-Übereinkommen</a> · <a href="https://www.hcch.net/en/news-archive/details/?varevent=1158">HCCH — Hinterlegung der Beitrittsurkunde</a></li>
+        <li><span class="k">Leasehold · Rechtsprechung</span><a href="https://www.austchamthailand.com/resources/news/thai-supreme-court-shuts-door-long-term-lease-loopholes-foreign-property-investors">AustCham — Oberster Gerichtshof zu Langzeit-Lease-Konstruktionen</a> · <a href="https://www.savills.com/blog/article/225735-1/singapore-articles/the-foreign-buyer-s-complete-guide-to-thai-property-law-(2025-edition).aspx">Savills — Leitfaden zum thailändischen Immobilienrecht</a></li>
+        <li><span class="k">Reformen · EU-FTA</span><a href="https://www.siamrealestate.com/news/thailand-government-reviews-foreign-condo-ownership-quota">Regierung prüft die Quote für ausländisches Wohnungseigentum</a> · <a href="https://www.europarl.europa.eu/legislative-train/theme-a-global-europe-leveraging-our-power-and-partnerships/file-eu-thailand-fta">Europäisches Parlament — Legislative Train, EU-Thailand-FTA</a> · <a href="https://www.bangkokpost.com/thailand/general/3281964/thailand-eu-free-trade-talks-make-more-progress">Bangkok Post — Fortschritte in den FTA-Verhandlungen</a></li>
+      </ul>
+    </div>
+  </div>
+</article>
+
+<footer class="small">
+  <p>Zusammengestellt am 3. September 2026 aus öffentlich zugänglichen Quellen. Rechtsstand und Verwaltungspraxis können sich ändern, und einzelne Land Offices legen Nachweisanforderungen unterschiedlich aus. Dies ist eine Recherche, keine Rechts- oder Steuerberatung — vor einer Transaktion einen in Thailand zugelassenen Anwalt sowie steuerlichen Rat auf rumänischer Seite einholen.</p>
+</footer>
+</body>
+</html>
