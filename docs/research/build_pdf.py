@@ -38,21 +38,21 @@ def chromium_path() -> str | None:
 
 # Kopf- und Fusszeile rendern in einem eigenen Kontext ohne das Seiten-CSS,
 # deshalb sind Schriftgroesse und Rand hier ausgeschrieben.
-HEADER = """
-<div style="width:100%;padding:0 15mm;font-family:Helvetica,Arial,sans-serif;
-            font-size:7pt;color:#8A948D;display:flex;justify-content:space-between;">
-  <span>Thail&auml;ndisches Wohnungseigentum f&uuml;r rum&auml;nische Gesellschaften</span>
-  <span>Rechtsrecherche</span>
-</div>
-"""
+BAR = ('width:100%;padding:0 15mm;font-family:Helvetica,Arial,sans-serif;'
+       'font-size:7pt;color:#8A8A97;display:flex;justify-content:space-between;')
 
-FOOTER = """
-<div style="width:100%;padding:0 15mm;font-family:Helvetica,Arial,sans-serif;
-            font-size:7pt;color:#8A948D;display:flex;justify-content:space-between;">
-  <span>Keine Rechtsberatung &middot; Stand 3. September 2026</span>
+FOOTER = f"""
+<div style="{BAR}">
+  <span>Recherche, keine Beratung &middot; Stand 3. September 2026</span>
   <span>Seite <span class="pageNumber"></span> von <span class="totalPages"></span></span>
 </div>
 """
+
+
+def header_for(title: str) -> str:
+    """Laufender Kolumnentitel aus dem <title> des Dokuments."""
+    safe = (title.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    return f'<div style="{BAR}"><span>{safe}</span><span>Recherche</span></div>'
 
 
 def render(html: Path, pdf: Path) -> None:
@@ -67,7 +67,7 @@ def render(html: Path, pdf: Path) -> None:
             format="A4",
             print_background=True,
             display_header_footer=True,
-            header_template=HEADER,
+            header_template=header_for(page.title()),
             footer_template=FOOTER,
             margin={"top": "18mm", "bottom": "16mm", "left": "15mm", "right": "15mm"},
         )

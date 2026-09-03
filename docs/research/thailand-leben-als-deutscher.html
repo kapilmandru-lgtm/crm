@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Als Deutscher in Thailand leben: Visa-Wege, Budget, Versicherungen, Steuern, Meldepflichten und Alltagsfragen.">
+<title>Leben in Thailand als Deutscher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Roboto+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+  :root{
+    --paper:#F3F3F7;
+    --surface:#FBFBFD;
+    --surface-2:#E6E6EF;
+    --ink:#1A1A26;
+    --ink-2:#4B4B5C;
+    --ink-3:#78788A;
+    --rule:#D6D6E0;
+    --rule-strong:#AFAFBF;
+    --accent:#3A3A85;
+    --accent-soft:#E3E3F3;
+    --ok:#15625B;
+    --ok-soft:#DCECE9;
+    --warn:#7E5A0C;
+    --warn-soft:#F4EAD3;
+    --alert:#96263F;
+    --alert-soft:#F7E1E6;
+
+    --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+    --f-mono:"Roboto Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#121220;
+      --surface:#1B1B2B;
+      --surface-2:#252537;
+      --ink:#E8E8F1;
+      --ink-2:#A6A6BA;
+      --ink-3:#818193;
+      --rule:#2C2C40;
+      --rule-strong:#3F3F56;
+      --accent:#9B99EC;
+      --accent-soft:#232244;
+      --ok:#5AC2B4;
+      --ok-soft:#12332F;
+      --warn:#DCB562;
+      --warn-soft:#2F2817;
+      --alert:#E9849C;
+      --alert-soft:#351D25;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#121220;
+    --surface:#1B1B2B;
+    --surface-2:#252537;
+    --ink:#E8E8F1;
+    --ink-2:#A6A6BA;
+    --ink-3:#818193;
+    --rule:#2C2C40;
+    --rule-strong:#3F3F56;
+    --accent:#9B99EC;
+    --accent-soft:#232244;
+    --ok:#5AC2B4;
+    --ok-soft:#12332F;
+    --warn:#DCB562;
+    --warn-soft:#2F2817;
+    --alert:#E9849C;
+    --alert-soft:#351D25;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:var(--f-body);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent-soft);color:var(--ink)}
+  a{color:var(--accent);text-underline-offset:.18em;text-decoration-thickness:.06em}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+  /* masthead */
+  .masthead{background:var(--surface);border-bottom:1px solid var(--rule-strong)}
+  .masthead-in{max-width:86rem;margin-inline:auto;padding:2.6rem 1.5rem 2.2rem;display:grid;gap:1.1rem}
+  .eyebrow{
+    font-family:var(--f-mono);font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--ink-3);display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;
+  }
+  h1{
+    font-family:var(--f-display);font-weight:700;
+    font-size:clamp(1.95rem,1.15rem + 2.7vw,3.15rem);
+    line-height:1.08;letter-spacing:-.025em;margin:0;text-wrap:balance;max-width:20ch;
+  }
+  .standfirst{font-size:clamp(1.02rem,.96rem + .3vw,1.18rem);color:var(--ink-2);max-width:60ch;margin:0}
+
+  /* decision board */
+  .board-wrap{max-width:86rem;margin-inline:auto;padding:2rem 1.5rem 0}
+  .board{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+  @media (min-width:780px){.board{grid-template-columns:repeat(3,1fr)}}
+  .bcell{background:var(--surface);padding:1.25rem 1.3rem 1.4rem;display:grid;gap:.4rem;align-content:start}
+  .bcell .q{
+    font-family:var(--f-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
+  }
+  .bcell h3{font-family:var(--f-display);font-weight:600;font-size:1.12rem;margin:0;line-height:1.25;letter-spacing:-.01em}
+  .bcell p{margin:0;font-size:.92rem;color:var(--ink-2)}
+
+  /* document grid */
+  .doc{padding:0 1.5rem 4rem;display:grid;gap:0}
+  .row{
+    max-width:86rem;margin-inline:auto;width:100%;
+    display:grid;grid-template-columns:minmax(0,1fr);gap:.4rem;padding:1.4rem 0;
+  }
+  @media (min-width:1000px){
+    .row{grid-template-columns:13.5rem minmax(0,66ch);column-gap:3rem;justify-content:center}
+  }
+  /* Randspalte: die harte Zahl, nicht Dekoration */
+  .fig{font-family:var(--f-mono);font-size:.72rem;line-height:1.55;color:var(--ink-3)}
+  @media (min-width:1000px){
+    .fig{text-align:right;padding-top:.5rem;padding-right:1rem;border-right:1px solid var(--rule);
+         margin-right:-2rem;position:sticky;top:1.5rem;align-self:start}
+  }
+  .fig b{display:block;color:var(--ink-2);font-weight:500}
+  .fig .big{
+    display:block;font-family:var(--f-display);font-weight:600;font-size:1.5rem;
+    color:var(--accent);letter-spacing:-.02em;line-height:1.1;margin-bottom:.15rem;
+    font-variant-numeric:tabular-nums;
+  }
+  .col{min-width:0}
+  .col > * + *{margin-top:.9rem}
+
+  h2{font-family:var(--f-display);font-weight:600;font-size:1.55rem;line-height:1.18;
+     letter-spacing:-.02em;margin:0;text-wrap:balance}
+  h3{font-family:var(--f-display);font-weight:600;font-size:1.02rem;margin:0;letter-spacing:-.01em}
+  .rule-row{border-top:1px solid var(--rule-strong);padding-top:1.9rem}
+  p{margin:0;max-width:66ch}
+  .lede{font-size:1.06rem;color:var(--ink-2)}
+  .sec-no{font-family:var(--f-mono);font-size:.7rem;color:var(--accent);letter-spacing:.12em;
+          text-transform:uppercase;display:block;margin-bottom:.3rem}
+  .caption{font-size:.83rem;color:var(--ink-3);max-width:60ch;font-family:var(--f-display)}
+  code{font-family:var(--f-mono);font-size:.88em;background:var(--surface-2);padding:.08em .34em;border-radius:2px}
+
+  ul,ol{margin:0;padding-left:1.2rem}
+  li{margin-top:.42rem;max-width:64ch}
+  li::marker{color:var(--ink-3)}
+  strong{font-weight:600}
+
+  .panel{background:var(--surface);border:1px solid var(--rule);border-radius:3px;
+         padding:1.1rem 1.2rem;display:grid;gap:.55rem}
+  .panel.alert{background:var(--alert-soft);border-color:var(--alert)}
+  .panel.alert h3{color:var(--alert)}
+  .panel.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .panel.warn h3{color:var(--warn)}
+  .panel.ok{background:var(--ok-soft);border-color:var(--ok)}
+  .panel.ok h3{color:var(--ok)}
+  .panel p,.panel li{color:var(--ink-2)}
+  .panel.alert p,.panel.alert li,.panel.warn p,.panel.warn li,.panel.ok p,.panel.ok li{color:var(--ink)}
+
+  /* tables */
+  .tw{overflow-x:auto;border:1px solid var(--rule);border-radius:3px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:46rem;font-family:var(--f-display);font-size:.88rem}
+  th,td{text-align:left;padding:.6rem .8rem;border-bottom:1px solid var(--rule);vertical-align:top}
+  thead th{font-family:var(--f-mono);font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+           color:var(--ink-3);font-weight:500;background:var(--surface-2)}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.82rem}
+  td.name{font-weight:600}
+  .yes{color:var(--ok);font-weight:600}
+  .no{color:var(--alert);font-weight:600}
+
+  /* budget ranges */
+  .ranges{display:grid;gap:.75rem;margin-top:1rem}
+  .range-row{display:grid;grid-template-columns:6.5rem minmax(0,1fr);gap:.8rem;align-items:center}
+  .range-city{font-family:var(--f-display);font-weight:600;font-size:.9rem}
+  .range-track{position:relative;height:1.65rem;background:var(--surface-2);border-radius:2px}
+  .range-bar{position:absolute;top:0;bottom:0;background:var(--accent);border-radius:2px;
+             display:flex;align-items:center;justify-content:space-between;padding:0 .45rem;
+             font-family:var(--f-mono);font-size:.66rem;color:#fff;white-space:nowrap}
+  :root[data-theme="dark"] .range-bar{color:#15152A}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .range-bar{color:#15152A}}
+  .range-axis{position:relative;height:1.1rem;margin-left:7.3rem;
+              font-family:var(--f-mono);font-size:.66rem;color:var(--ink-3)}
+  .range-axis span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+  .range-axis span:first-child{transform:none}
+  .range-axis span:last-child{transform:translateX(-100%)}
+
+  /* steps */
+  ol.steps{list-style:none;padding-left:0;counter-reset:st;display:grid;gap:0}
+  ol.steps li{counter-increment:st;position:relative;padding:.8rem 0 .8rem 5.6rem;margin:0;
+              border-bottom:1px solid var(--rule);max-width:none}
+  ol.steps li:last-child{border-bottom:0}
+  ol.steps li::before{content:attr(data-when);position:absolute;left:0;top:.92rem;width:4.9rem;
+                      text-align:right;font-family:var(--f-mono);font-size:.68rem;color:var(--accent);
+                      letter-spacing:.03em}
+  ol.steps b{font-family:var(--f-display);font-weight:600;display:block}
+  ol.steps span{color:var(--ink-2);font-size:.94rem}
+
+  /* sources */
+  .sources{font-size:.88rem;color:var(--ink-2)}
+  .sources ul{list-style:none;padding-left:0;display:grid;gap:.5rem}
+  .sources li{margin:0;padding-left:0;max-width:none;line-height:1.45}
+  .sources .k{font-family:var(--f-mono);font-size:.66rem;color:var(--ink-3);letter-spacing:.08em;
+              text-transform:uppercase;display:block}
+  footer.small{max-width:86rem;margin-inline:auto;padding:1.6rem 1.5rem 3rem;
+               border-top:1px solid var(--rule-strong);font-size:.84rem;color:var(--ink-3)}
+  footer.small p{max-width:74ch}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>
+/* ---------- Druckfassung (A4) ---------- */
+@page{ size:A4; }
+@media print{
+  :root{
+    --paper:#FFFFFF;   --surface:#F8F8FC; --surface-2:#EAEAF2;
+    --ink:#17171F;     --ink-2:#43434F;   --ink-3:#6E6E7E;
+    --rule:#D2D2DC;    --rule-strong:#A7A7B6;
+    --accent:#33327A;  --accent-soft:#E6E6F4;
+    --ok:#12564F;      --ok-soft:#DFEDEA;
+    --warn:#6B4D08;    --warn-soft:#F5ECD8;
+    --alert:#872137;   --alert-soft:#F8E3E8;
+  }
+  html,body{background:#fff}
+  body{font-size:10.2pt;line-height:1.48;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  .masthead-in,.board-wrap,.row,footer.small{max-width:none;padding-left:0;padding-right:0;margin-inline:0}
+  .doc{padding-left:0;padding-right:0;padding-bottom:0}
+  .masthead{background:transparent;border-bottom:1pt solid var(--rule-strong)}
+  .masthead-in{padding-top:0;padding-bottom:7mm;gap:4mm}
+  .board-wrap{padding-top:6mm}
+
+  h1{font-size:24pt;max-width:24ch}
+  .standfirst{font-size:10.4pt}
+  .eyebrow{font-size:7pt}
+  h2{font-size:13.5pt}
+  h3{font-size:10.4pt}
+  .lede{font-size:10.5pt}
+  .sec-no{font-size:7pt}
+  .caption{font-size:8pt}
+  .fig{font-size:7.4pt;line-height:1.42}
+  .fig .big{font-size:15pt}
+
+  /* Randspalte mit der operativen Zahl */
+  .row{grid-template-columns:30mm minmax(0,1fr);column-gap:7mm;justify-content:start;padding:5mm 0}
+  .fig{position:static;text-align:right;border-right:.75pt solid var(--rule);
+       padding-right:3.5mm;padding-top:1.2mm;margin-right:0}
+  .rule-row{padding-top:6mm}
+
+  .board{grid-template-columns:repeat(3,1fr)}
+  .bcell{padding:3.2mm 3.6mm 3.8mm;gap:1.4mm}
+  .bcell h3{font-size:10.2pt}
+  .bcell p{font-size:8.3pt}
+
+  /* Visa-Matrix muss auf die Seitenbreite passen */
+  .tw{overflow:visible}
+  table{min-width:0;font-size:7.4pt;table-layout:fixed}
+  th,td{padding:1.3mm 1.8mm;word-break:normal;overflow-wrap:break-word;
+        hyphens:auto;-webkit-hyphens:auto}
+  thead th{font-size:6.2pt;hyphens:none}
+  /* Die Matrix darf ueber den Seitenrand laufen, sonst bleibt eine halbe
+     Seite leer. Zeilen bleiben zusammen, der Kopf wiederholt sich. */
+  thead{display:table-header-group}
+  tr{break-inside:avoid}
+  /* Die Betraege muessen im Druck umbrechen duerfen, sonst laufen sie
+     in die Nachbarspalte. */
+  td.num{font-size:6.9pt;white-space:normal;line-height:1.35}
+  table col.c-weg{width:19%}
+  table col.c-wer{width:15%}
+  table col.c-geld{width:30%}
+  table col.c-kv{width:19%}
+  table col.c-lauf{width:17%}
+
+  .ranges{margin-top:4mm}
+  .range-city{font-size:8.4pt}
+  .range-bar span{font-size:6.4pt}
+  .range-axis{font-size:6.4pt}
+
+  ol.steps li{padding:3mm 0 3mm 24mm}
+  ol.steps li::before{width:20mm;top:3.4mm;font-size:6.8pt}
+  ol.steps span{font-size:9.4pt}
+
+  /* Umbrueche */
+  .panel,.bcell,.ranges,ol.steps li,.sources li{break-inside:avoid}
+  .tw{break-inside:auto}
+  .board{break-inside:avoid}
+  h1,h2,h3,.sec-no{break-after:avoid}
+  p,li{orphans:2;widows:2}
+
+  a{color:var(--accent);text-decoration:none}
+  .sources a::after{content:" (" attr(href) ")";font-family:var(--f-mono);font-size:6.6pt;
+                    color:var(--ink-3);word-break:break-all}
+  footer.small{padding:5mm 0 0;border-top:1pt solid var(--rule-strong)}
+}
+</style>
+
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-in">
+    <div class="eyebrow">
+      <span>Recherche</span><span>Deutschland → Thailand</span><span>Stand: 3. September 2026</span>
+      <span>Kurs gerundet: 1 € ≈ 38 THB</span>
+    </div>
+    <h1>Als Deutscher in Thailand leben</h1>
+    <p class="standfirst">Thailand kennt keinen „Auswanderer-Status“. Es gibt kein Daueraufenthaltsrecht für den Normalfall, sondern befristete Visa, die jährlich bestätigt werden — und die Wahl unter ihnen entscheidet über Geld, Versicherungspflicht und Steuerlast. Diese Recherche ordnet die Wege, nennt die Beträge und die Punkte, an denen es in der Praxis schiefgeht.</p>
+  </div>
+</header>
+
+<section class="board-wrap" aria-label="Die drei Grundfragen">
+  <div class="board">
+    <div class="bcell">
+      <span class="q">Frage 1 · Der Weg hinein</span>
+      <h3>Welches Visum trägt dich?</h3>
+      <p>Sieben realistische Wege, von 400.000 THB auf einem Thai-Konto bis 5 Mio. THB Einmalzahlung. Alter, Einkommensart und Arbeitswunsch entscheiden — nicht der Wohnort.</p>
+    </div>
+    <div class="bcell">
+      <span class="q">Frage 2 · Das Geld</span>
+      <h3>Zwei Töpfe, nicht einer</h3>
+      <p>Die Lebenshaltung (500–2.400 € im Monat) und die gebundene Visa-Rücklage (bis 3 Mio. THB, die liegen bleiben muss) sind getrennt zu rechnen.</p>
+    </div>
+    <div class="bcell">
+      <span class="q">Frage 3 · Was zurückbleibt</span>
+      <h3>Die deutsche Seite</h3>
+      <p>Abmeldung beendet die gesetzliche Krankenversicherung. Rente, Anwartschaft und Steuerpflicht ordnen sich neu — und das teils zu deinen Gunsten.</p>
+    </div>
+  </div>
+</section>
+
+<article class="doc">
+
+  <div class="row rule-row" style="border-top:0">
+    <aside class="fig">
+      <span class="big">7</span>
+      <b>gangbare Visa-Wege</b>
+      für Deutsche, je nach Alter,<br>Einkommen und Arbeitswunsch
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 1 · Visum</span>Die Wege hinein — und was jeder verlangt</h2>
+      <p class="lede">Ein Visum berechtigt zur Einreise, die <em>Extension of Stay</em> zum Bleiben. Fast alle Langzeitwege laufen auf denselben Rhythmus hinaus: einmal beantragen, danach jedes Jahr bei der örtlichen Immigration verlängern.</p>
+      <div class="tw">
+        <table>
+          <colgroup>
+            <col class="c-weg"><col class="c-wer"><col class="c-geld"><col class="c-kv"><col class="c-lauf">
+          </colgroup>
+          <thead>
+            <tr><th>Weg</th><th>Wer</th><th>Geldnachweis</th><th>KV-Pflicht</th><th>Laufzeit</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="name">Non-O (Retirement)<br><span style="font-weight:400;color:var(--ink-3)">im Land umgewandelt</span></td>
+              <td>ab 50</td>
+              <td class="num">800.000 THB ≈ 21.100 €<br>auf Thai-Konto<br><em>oder</em> 65.000 THB/Mon.</td>
+              <td class="no">nein</td>
+              <td class="num">1 J., jährlich</td>
+            </tr>
+            <tr>
+              <td class="name">Non-O-A<br><span style="font-weight:400;color:var(--ink-3)">Konsulat in Deutschland</span></td>
+              <td>ab 50</td>
+              <td class="num">800.000 THB<br><em>oder</em> 65.000 THB/Mon.</td>
+              <td class="yes">ja — 3 Mio. THB</td>
+              <td class="num">1 J., jährlich</td>
+            </tr>
+            <tr>
+              <td class="name">Non-O (Ehe)</td>
+              <td>mit thail. Ehepartner</td>
+              <td class="num">400.000 THB ≈ 10.500 €<br><em>oder</em> 40.000 THB/Mon.</td>
+              <td class="no">nein</td>
+              <td class="num">1 J., jährlich</td>
+            </tr>
+            <tr>
+              <td class="name">Non-O-X</td>
+              <td>ab 50, Deutsche zugelassen</td>
+              <td class="num">3 Mio. THB ≈ 79.000 €<br>ein Jahr unangetastet</td>
+              <td class="yes">ja</td>
+              <td class="num">10 J. (2 × 5)</td>
+            </tr>
+            <tr>
+              <td class="name">LTR — Wealthy Pensioner<br><span style="font-weight:400;color:var(--ink-3)">über das BOI</span></td>
+              <td>ab 50</td>
+              <td class="num">80.000 USD/Jahr passiv<br><em>oder</em> 40.000 USD + 250.000 USD<br>Investment in Thailand</td>
+              <td class="yes">ja — 50.000 USD<br>oder 100.000 USD Einlage</td>
+              <td class="num">10 J. (2 × 5)</td>
+            </tr>
+            <tr>
+              <td class="name">DTV</td>
+              <td>Remote-Arbeit, kein Mindestalter</td>
+              <td class="num">500.000 THB ≈ 13.200 €<br>oft 3 Monate vorgehalten</td>
+              <td>gering (40.000 THB)</td>
+              <td class="num">5 J., 180 Tage/Einreise</td>
+            </tr>
+            <tr>
+              <td class="name">Thailand Privilege<br><span style="font-weight:400;color:var(--ink-3)">früher „Elite“</span></td>
+              <td>ohne Alters- oder Einkommensgrenze</td>
+              <td class="num">650.000 THB (Bronze, 5 J.)<br>bis 5 Mio. THB (Reserve, 20 J.)<br>Einmalzahlung</td>
+              <td class="no">nein</td>
+              <td class="num">5–20 J.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="caption">Beträge in THB sind die verbindliche Größe; Euro-Werte gerundet bei 38 THB je Euro. Erwerbstätigkeit <em>in</em> Thailand erlaubt keiner dieser Wege — dafür braucht es Non-B plus Work Permit.</p>
+      <div class="panel warn">
+        <h3>Der wichtigste Unterschied der ganzen Tabelle</h3>
+        <p><strong>Non-O und Non-O-A sehen gleich aus und sind es nicht.</strong> Das O-A wird im Ausland beantragt und verlangt bei jeder Jahresverlängerung eine Krankenversicherung über 3 Mio. THB. Das Non-O, im Land beantragt oder umgewandelt, kennt diese gesetzliche Pflicht nicht. Wer einmal im O-A-Status ist, behält ihn auch bei der Verlängerung im Land — ein direkter Wechsel zu Non-O ist innerhalb Thailands nicht vorgesehen. Diese Entscheidung fällt vor der ersten Antragstellung, nicht später.</p>
+      </div>
+      <div class="panel ok">
+        <h3>Wenn das Einkommen es hergibt: LTR</h3>
+        <p>Das LTR-Visum ist der einzige Weg mit einem echten steuerlichen Vorteil: Für die Kategorien <em>Wealthy Pensioner</em> und <em>Wealthy Global Citizen</em> sind ausländische Einkünfte von der thailändischen Steuer ausgenommen. Dazu meldet man sich jährlich statt alle 90 Tage. Der Preis ist die Einkommenshürde von 80.000 USD passivem Jahreseinkommen — Gehalt zählt für Pensionäre ausdrücklich nicht.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="fig">
+      <span class="big">≈ 50 %</span>
+      <b>der deutschen Lebens&shy;haltungskosten</b>
+      als grobe Hausnummer —<br>bei westlichem Lebensstil<br>schmilzt der Vorteil
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 2 · Geld</span>Was es monatlich kostet</h2>
+      <p>Realistische Gesamtkosten pro Person und Monat, inklusive Miete, Essen, Transport, Gesundheit und Freizeit:</p>
+      <div class="ranges">
+        <div class="range-row">
+          <span class="range-city">Chiang Mai</span>
+          <div class="range-track" role="img" aria-label="Chiang Mai: 500 bis 1.200 Euro im Monat">
+            <div class="range-bar" style="left:20%;width:28%"><span>500 €</span><span>1.200 €</span></div>
+          </div>
+        </div>
+        <div class="range-row">
+          <span class="range-city">Bangkok</span>
+          <div class="range-track" role="img" aria-label="Bangkok: 800 bis 2.200 Euro im Monat">
+            <div class="range-bar" style="left:32%;width:56%"><span>800 €</span><span>2.200 €</span></div>
+          </div>
+        </div>
+        <div class="range-row">
+          <span class="range-city">Phuket</span>
+          <div class="range-track" role="img" aria-label="Phuket: 950 bis 2.400 Euro im Monat">
+            <div class="range-bar" style="left:38%;width:58%"><span>950 €</span><span>2.400 €</span></div>
+          </div>
+        </div>
+        <div class="range-axis">
+          <span style="left:0">0 €</span><span style="left:20%">500 €</span><span style="left:40%">1.000 €</span>
+          <span style="left:60%">1.500 €</span><span style="left:80%">2.000 €</span><span style="left:100%">2.500 €</span>
+        </div>
+      </div>
+      <p class="caption">Monatliche Gesamtkosten je Person. Die Spanne bildet den Lebensstil ab, nicht die Preise: Die Untergrenze ist lokales Leben, die Obergrenze eine westliche Wohnung mit Klimaanlage, importierten Lebensmitteln und Privatklinik.</p>
+      <p>Möblierte Ein-Zimmer-Wohnung zur Miete: Chiang Mai etwa 300–500 €, Bangkok 480–760 €, Phuket 570–1.000 € — die größte Einzelposition und der Hebel, an dem sich das Budget am schnellsten dreht.</p>
+      <div class="panel">
+        <h3>Der zweite Topf: gebundenes Kapital</h3>
+        <p>Die Visa-Rücklage ist kein Budget, sondern Pfand. 800.000 THB (rund 21.100 €) müssen für das Rentnervisum auf einem thailändischen Konto liegen — vor dem Antrag mindestens zwei Monate, und die Immigration erwartet, dass der Betrag über die Verlängerungsfristen hinweg gehalten wird. Beim O-X sind es 3 Mio. THB, ein volles Jahr unangetastet. Wer stattdessen den Einkommensnachweis wählt (65.000 THB monatlich, rund 1.700 €), bindet nichts — braucht aber eine Bestätigung des laufenden Zuflusses.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="fig">
+      <span class="big">0 €</span>
+      <b>zahlt die gesetzliche<br>Krankenkasse in Thailand</b>
+      Der GKV-Schutz endet<br>mit dem Wegzug — vollständig
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 3 · Versicherung</span>Der Punkt, an dem es wirklich teuer werden kann</h2>
+      <p class="lede">Die gesetzliche Krankenversicherung leistet in Thailand nicht. Mit der Abmeldung endet die Mitgliedschaft, und mit ihr die Beitragspflicht — aber eben auch jeder Anspruch. Private Absicherung ist damit keine Option, sondern die Grundlage.</p>
+      <ul>
+        <li><strong>Deckungssummen nach Visum.</strong> Non-O-A verlangt 3 Mio. THB. Das LTR verlangt 50.000 USD Deckung oder ersatzweise eine Einlage von 100.000 USD auf einem thailändischen Konto. Das DTV nennt nur eine symbolische Summe von 40.000 THB. Diese Zahlen sind <em>Zulassungsvoraussetzungen</em>, keine Empfehlung — für den Ernstfall ist eine Deckung ab etwa 500.000 € die realistische Größenordnung.</li>
+        <li><strong>Preisspanne.</strong> Reise-nahe Budget-Tarife beginnen bei rund 50 USD im Monat. Vollwertige Expat-Tarife für unter 60-Jährige liegen eher bei 300 € monatlich — und steigen mit dem Alter deutlich.</li>
+        <li><strong>Worauf es im Vertrag ankommt:</strong> ambulant <em>und</em> stationär, Direktabrechnung mit privaten Krankenhäusern, Rücktransport nach Deutschland, kein enger Ausschluss von Vorerkrankungen, und die Frage, ob der Vertrag lebenslang verlängerbar ist.</li>
+        <li><strong>Anwartschaft in Deutschland.</strong> Für rund 50 € im Monat lässt sich die Rückkehr in die gesetzliche Kasse offenhalten. Da in Deutschland Versicherungspflicht gilt, ist das bei einer möglichen Rückkehr die günstigste Versicherung gegen ein teures Problem.</li>
+        <li><strong>Pflegeversicherung.</strong> Entfällt mit der Verlagerung des Wohnsitzes — und damit auch jede Leistung daraus. Pflegebedürftigkeit im Alter ist in Thailand privat zu tragen.</li>
+      </ul>
+      <div class="panel alert">
+        <h3>Das Aufnahmealter ist die eigentliche Frist</h3>
+        <p>Private Expat-Krankenversicherungen haben Höchstaufnahmealter, und Vorerkrankungen werden bei Neuabschluss geprüft. Wer mit Ende sechzig auswandert und erst dann sucht, findet häufig keinen tragfähigen Vertrag mehr — oder nur einen mit Ausschlüssen genau dort, wo das Risiko liegt. Die Versicherung ist deshalb <strong>vor</strong> der Visumsfrage zu klären, nicht danach.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="fig">
+      <span class="big">180</span>
+      <b>Tage im Kalenderjahr</b>
+      ab da bist du in Thailand<br>steuerlich ansässig
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 4 · Steuern</span>Die 180-Tage-Grenze und die Überweisungsregel</h2>
+      <p>Wer sich in einem <strong>Kalenderjahr</strong> 180 Tage oder länger in Thailand aufhält, ist dort steuerlich ansässig. Gezählt wird kalenderjahrweise, nicht rollierend.</p>
+      <ul>
+        <li><strong>Seit dem 1. Januar 2024</strong> sind ins Land überwiesene Auslandseinkünfte steuerpflichtig, unabhängig davon, in welchem Jahr sie erzielt wurden. Vor dem 1. Januar 2024 erzieltes Vermögen bleibt nach Klarstellung der Finanzverwaltung überweisbar, ohne besteuert zu werden.</li>
+        <li><strong>Besteuert wird die Überweisung, nicht der Zufluss.</strong> Ausländisches Einkommen wird erst steuerbar, wenn es nach Thailand gebracht wird und aus einem Jahr stammt, in dem man dort ansässig war. Das eröffnet Gestaltungsspielraum — und ist zugleich die Falle: Wer erst überweist und dann fragt, hat den Tatbestand bereits gesetzt.</li>
+        <li><strong>Eine Erleichterung ist im Gespräch</strong> — Auslandseinkünfte, die innerhalb von zwei Steuerjahren überwiesen werden, sollen unbesteuert bleiben. Das ist ein Vorschlag der Finanzverwaltung, kein geltendes Recht.</li>
+      </ul>
+      <h3 style="margin-top:1.3rem">Das Abkommen mit Deutschland von 1967</h3>
+      <ul>
+        <li><strong>Artikel 18 Absatz 1:</strong> Ruhegehälter und Renten für frühere unselbständige Arbeit dürfen nur im Ansässigkeitsstaat besteuert werden — bei Wohnsitz in Thailand also dort. Die Ausnahme greift, wenn die Zahlungen bei einem deutschen Unternehmen als Betriebsausgaben abgezogen wurden; das trifft typischerweise <strong>Betriebsrenten</strong>, für die dann Deutschland zugreift.</li>
+        <li><strong>Artikel 19, Kassenstaatsprinzip:</strong> Beamtenpensionen und Bezüge aus öffentlichen Kassen bleiben in Deutschland steuerpflichtig — unabhängig vom Wohnsitz.</li>
+        <li><strong>Zuständig</strong> für Rentner im Ausland ist zentral das Finanzamt Neubrandenburg.</li>
+      </ul>
+      <div class="panel warn">
+        <h3>Hier gehen seriöse Quellen auseinander</h3>
+        <p>Für die <strong>gesetzliche Rente der Deutschen Rentenversicherung</strong> ordnet die überwiegende deutschsprachige Beratungsliteratur das Besteuerungsrecht über Artikel 18 Absatz 1 dem Wohnsitzstaat Thailand zu. Es finden sich aber auch Darstellungen, die staatliche Renten weiterhin Deutschland zuweisen. Das Abkommen von 1967 kennt keinen eigenen Artikel für Sozialversicherungsrenten, und daran hängt die Unsicherheit.</p>
+        <p>Der Unterschied ist keine Feinheit: Er entscheidet über die gesamte Steuerlast auf das Haupteinkommen. Diese Frage gehört vor dem Wegzug verbindlich geklärt — über eine Anrufungsauskunft bzw. steuerliche Beratung, nicht über ein Forum.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="fig">
+      <span class="big">≈ 50 €</span>
+      <b>im Monat für die<br>Anwartschaft</b>
+      hält die Rückkehr in die<br>gesetzliche Kasse offen
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 5 · Deutschland</span>Was der Wegzug auf der deutschen Seite auslöst</h2>
+      <ul>
+        <li><strong>Abmeldung beim Einwohnermeldeamt.</strong> Die Abmeldebescheinigung ist das Dokument, mit dem gegenüber Kasse, Rentenversicherung und Finanzamt der Wegfall des Wohnsitzes belegt wird.</li>
+        <li><strong>Gesetzliche Krankenversicherung.</strong> Die Mitgliedschaft endet mit Wohnsitz und gewöhnlichem Aufenthalt. Keine Beiträge mehr — und kein Leistungsanspruch. Die Anwartschaft ist der Rückweg.</li>
+        <li><strong>Beitragszuschuss zur Krankenversicherung</strong> aus der Rente entfällt beim dauerhaften Wegzug.</li>
+        <li><strong>Rentenzahlung.</strong> Die Deutsche Rentenversicherung zahlt nach Thailand; die Überweisungskosten trägt der Rentner selbst. Jährlich ist eine Lebensbescheinigung vorzulegen.</li>
+        <li><strong>Auslandsrentenrecht.</strong> Bei Wohnsitz außerhalb der EU können einzelne Rentenbestandteile gekürzt werden. Altersrenten aus eigenen Beitragszeiten sind davon regelmäßig nicht betroffen — wer Fremdrenten-, Ersatz- oder Anrechnungszeiten im Versicherungsverlauf hat, sollte sich die konkrete Auswirkung von der DRV schriftlich bestätigen lassen.</li>
+        <li><strong>Bestehende Verträge prüfen.</strong> Haftpflicht, Unfall, Berufsunfähigkeit und Rechtsschutz enthalten oft Klauseln zum dauerhaften Auslandsaufenthalt; der Schutz endet dort leise.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="fig">
+      <span class="big">90</span>
+      <b>Tage bis zur nächsten<br>Meldung</b>
+      und 24 Stunden für den<br>Vermieter nach der Ankunft
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 6 · Pflichten</span>Der laufende Takt vor Ort</h2>
+      <ul>
+        <li><strong>TDAC — Thailand Digital Arrival Card.</strong> Seit dem 1. Mai 2025 ersetzt sie das Papierformular TM6. Pflicht für alle Nicht-Thai, auch für Kinder, bei jeder Einreise; online bis 72 Stunden vor Ankunft über die Immigration.</li>
+        <li><strong>90-Tage-Meldung (TM.47).</strong> Wer sich ununterbrochen länger als 90 Tage im Land aufhält, meldet sich alle 90 Tage. Eine Auslandsreise setzt die Frist zurück.</li>
+        <li><strong>TM30.</strong> Vermieter oder Eigentümer melden die Unterkunft binnen 24 Stunden nach Ankunft. Klingt nach fremder Pflicht — ist aber in der Praxis häufig Voraussetzung für die eigene 90-Tage-Meldung und für die Verlängerung. Bei privater Vermietung muss man selbst dahinter her sein.</li>
+        <li><strong>Re-Entry Permit.</strong> Ohne ihn erlischt die Extension of Stay beim Verlassen des Landes. Der einzelne teure Fehler, den man nur einmal macht.</li>
+        <li><strong>Jährliche Extension of Stay</strong> bei der örtlichen Immigration, mit dem jeweils erneuerten Geld- oder Einkommensnachweis.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="fig">
+      <span class="big">3</span>
+      <b>Monate</b>
+      gilt der internationale<br>Führerschein — danach<br>braucht es den thailändischen
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 7 · Alltag</span>Bank, Führerschein, Arbeit, Nachlass</h2>
+      <ul>
+        <li><strong>Führerschein.</strong> Der deutsche Führerschein mit internationalem Begleitdokument trägt rund drei Monate. Danach ist der thailändische Führerschein nötig; er wird auf Grundlage des deutschen ausgestellt, wozu eine Übersetzung ins Thailändische und eine Bestätigung der deutschen Botschaft gehören. Ohne gültige Fahrerlaubnis greift im Schadensfall häufig auch die Versicherung nicht.</li>
+        <li><strong>Bankkonto.</strong> Die Eröffnung hängt in der Praxis am Visumstyp und an der jeweiligen Filiale. Üblich verlangt werden Pass, Visum und eine Residenzbescheinigung (Certificate of Residence) von der Immigration oder der Botschaft. Da die 800.000 THB auf einem <em>thailändischen</em> Konto liegen müssen, gehört die Kontoeröffnung an den Anfang der Visumsplanung, nicht ans Ende.</li>
+        <li><strong>Arbeiten.</strong> Jede Erwerbstätigkeit in Thailand braucht ein Work Permit — kein Rentner-, Privilege- oder Ehevisum ersetzt es. Das DTV erlaubt ausdrücklich nur Remote-Arbeit für Auftraggeber außerhalb Thailands, keine Tätigkeit für thailändische Unternehmen.</li>
+        <li><strong>Testament und Nachlass.</strong> In Thailand belegenes Vermögen fällt unter thailändisches Recht, unabhängig von einem deutschen Testament. Ein separates thailändisches Testament ist der sichere Weg; die gebräuchliche Form nach § 1656 des Civil and Commercial Code verlangt Schriftform, Datum sowie die Unterschriften des Erblassers und zweier gleichzeitig anwesender Zeugen. Land können Ausländer auch durch Erbschaft nicht behalten — es bleibt ein Jahr, um es zu veräußern.</li>
+        <li><strong>Gesundheitsversorgung.</strong> Private Krankenhäuser in Bangkok, Chiang Mai und auf Phuket arbeiten auf westlichem Niveau und rechnen entsprechend ab. Ohne Versicherung ist ein längerer stationärer Aufenthalt existenzbedrohend.</li>
+        <li><strong>Immobilien.</strong> Eine Eigentumswohnung kann man als Ausländer im Volleigentum kaufen, Land nicht. Wer eine Firmenkonstruktion für Land angeboten bekommt, sollte wissen, dass Thailand genau dagegen seit 2025 sehr scharf vorgeht.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="fig">
+      <b>Reihenfolge</b>
+      Versicherung vor Visum,<br>Visum vor Umzug,<br>Steuerfrage vor der<br>ersten Überweisung
+    </aside>
+    <div class="col">
+      <h2><span class="sec-no">Teil 8 · Fahrplan</span>In welcher Reihenfolge</h2>
+      <ol class="steps">
+        <li data-when="−12 Mon."><b>Krankenversicherung klären</b><span>Angebote einholen, solange Alter und Gesundheitszustand die Auswahl noch offenlassen. Das Ergebnis entscheidet mit über den Visumsweg.</span></li>
+        <li data-when="−12 Mon."><b>Steuerliche Ausgangslage prüfen</b><span>Renten- und Einkommensarten den DBA-Artikeln zuordnen lassen, insbesondere die Behandlung der gesetzlichen Rente. Vor jeder Überweisungsplanung.</span></li>
+        <li data-when="−9 Mon."><b>Visumsweg festlegen</b><span>Non-O oder Non-O-A ist eine Weichenstellung mit Versicherungsfolge. Bei hohem passivem Einkommen das LTR gegenrechnen.</span></li>
+        <li data-when="−6 Mon."><b>Geld positionieren</b><span>Thailändisches Konto eröffnen und die Rücklage rechtzeitig einzahlen — die Haltefristen laufen vor dem Antrag, nicht danach.</span></li>
+        <li data-when="−3 Mon."><b>Dokumente beschaffen</b><span>Führungszeugnis und ärztliches Attest für das O-A, Übersetzungen und Beglaubigungen, Führerschein-Unterlagen.</span></li>
+        <li data-when="−1 Mon."><b>Deutsche Seite abwickeln</b><span>Abmeldung, Anwartschaft abschließen, DRV über den Wohnsitzwechsel informieren, laufende Verträge auf Auslandsgeltung prüfen.</span></li>
+        <li data-when="Ankunft"><b>Melderhythmus starten</b><span>TDAC vor der Einreise, TM30 durch den Vermieter, danach die 90-Tage-Meldung im Kalender führen. Re-Entry Permit vor der ersten Auslandsreise.</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="row rule-row">
+    <aside class="fig"><b>Kurzfassung</b></aside>
+    <div class="col">
+      <h2><span class="sec-no">Fazit</span>In einem Satz</h2>
+      <p class="lede">Thailand ist für Deutsche gut erreichbar, aber nicht bequem: Das Land vergibt kein dauerhaftes Bleiberecht, sondern verlangt jedes Jahr aufs Neue einen Geldnachweis, eine Meldung und — je nach gewähltem Visumstyp — eine Krankenversicherung. Wer die Reihenfolge einhält (erst Versicherung, dann Visum, dann Überweisungen) und die 180-Tage-Grenze im Blick behält, lebt dort deutlich günstiger als in Deutschland. Wer sie umdreht, zahlt für Korrekturen, die sich vorher hätten vermeiden lassen.</p>
+    </div>
+  </div>
+
+  <div class="row rule-row sources">
+    <aside class="fig"><b>Quellen</b></aside>
+    <div class="col">
+      <h2><span class="sec-no">Belege</span>Verwendete Quellen</h2>
+      <ul>
+        <li><span class="k">Visa · Überblick und Rentnervisum</span><a href="https://www.thaikonfrankfurt.de/de/non-immigrant-o-retirement.html">Königlich Thailändisches Generalkonsulat Frankfurt — Non-Immigrant O (Retirement)</a> · <a href="https://thaifreu.de/thailand/rentnervisum-thailand/">Rentnervisum Thailand 2026</a> · <a href="https://www.wochenblitz.com/langzeiturlaub-in-thailand-non-o-a-und-non-o-im-vergleich/">Non-O-A und Non-O im Vergleich</a> · <a href="https://www.wochenblitz.com/o-x-visum-thailand-10-jahre-bleiben-was-es-kostet/comment-page-1/">O-X-Visum: Voraussetzungen und Kosten</a></li>
+        <li><span class="k">LTR-Visum</span><a href="https://ltr.boi.go.th/">Board of Investment — LTR Visa Programm (offiziell)</a> · <a href="https://www.siam-legal.com/thailand-visa/ltr-visa-thailand-wealthy-pensioners.php">LTR Visa für Wealthy Pensioners</a> · <a href="https://www.hlbthai.com/thailand-long-term-resident-ltr-visa/">HLB Thailand — LTR: Updates und Voraussetzungen</a></li>
+        <li><span class="k">DTV</span><a href="https://www.expatden.com/thailand/destination-thailand-visa-dtv/">Destination Thailand Visa — Voraussetzungen 2026</a> · <a href="https://www.siam-legal.com/thailand-visa/dtv-visa-thailand.php">Siam Legal — DTV Visa Thailand</a> · <a href="https://www.thailandstarterkit.com/visas/destination-thailand-visa-dtv/">Thailand Starter Kit — DTV Requirements Guide</a></li>
+        <li><span class="k">Thailand Privilege</span><a href="https://www.thailandelite.net/pricing">Thailand Privilege — Preise und Stufen 2026</a> · <a href="https://www.siam-legal.com/thailand-visa/thailand-privilege-visa.html">Siam Legal — Thailand Privilege Visa</a></li>
+        <li><span class="k">Krankenversicherung</span><a href="https://thailandauswanderer.de/krankenversicherung-thailand-2026/">Krankenversicherung Thailand 2026 für Auswanderer und Rentner</a> · <a href="https://www.bdae.com/krankenversicherungen-auswandern-thailand">BDAE — Krankenversicherung beim Auswandern nach Thailand</a> · <a href="https://der-farang.com/de/pages/ohne-krankenschutz-kein-non-immigrant-o-a">Der Farang — Versicherungspflicht beim Non-Immigrant O-A</a> · <a href="https://www.siam-info.de/gesundheit/krankenversicherung.html">Siam-Info — Krankenversicherung in Thailand</a></li>
+        <li><span class="k">Steuern Thailand</span><a href="https://terms.law/Thai/tax/tax-residency-180-days.html">Die 180-Tage-Regel und die Besteuerung von Auslandseinkünften</a> · <a href="https://www.expattaxthailand.com/understanding-assessable-foreign-sourced-income-in-thailand/">Expat Tax Thailand — steuerpflichtige Auslandseinkünfte</a> · <a href="https://www.forvismazars.com/th/en/insights/doing-business-in-thailand/tax/tax-rules-on-foreign-sourced-income">Forvis Mazars — geplante Erleichterungen bei Auslandseinkünften</a></li>
+        <li><span class="k">Doppelbesteuerungsabkommen</span><a href="https://www.haufe.de/id/norm/dba-thailand-art-18-HI933849_p18.html">DBA Thailand, Artikel 18 (Volltext)</a> · <a href="https://www.steuerschroeder.de/blog/der-artikel-18-des-dba-zwischen-deutschland-und-thailand-die-besteuerung-von-ruhegehaeltern-und-renten/">Artikel 18 DBA Deutschland–Thailand: Ruhegehälter und Renten</a> · <a href="https://www.aseanbriefing.com/userfiles/resources-pdfs/Thailand/DTA/ASEAN_DTA_Thailand_Germany.pdf">Abkommenstext Thailand–Deutschland (PDF)</a> · <a href="https://www.expattaxthailand.com/thailand-germany-dta-tax-planning-german-expats/">Abweichende Einordnung staatlicher Renten</a></li>
+        <li><span class="k">Deutsche Seite: Rente, Kasse, Abmeldung</span><a href="https://www.finanzamt-rente-im-ausland.de/de/">Finanzamt Neubrandenburg — Rente im Ausland</a> · <a href="https://www.siam-info.de/geld/rente.html">Rentenzahlung nach Thailand</a> · <a href="https://rentenbescheid24.de/produkte/deutsche-im-ausland/internationale-rentenberatung-durch-rentenbescheid24-de/krankenversicherung-fuer-rentner-thailand/">Krankenversicherungsschutz für deutsche Rentner in Thailand</a> · <a href="https://www.biallo.de/recht-steuern/ratgeber/rente-im-ausland/">Rente im Ausland: Kürzungen und Steuerregeln</a></li>
+        <li><span class="k">Meldepflichten und Einreise</span><a href="https://tdac.immigration.go.th/">Thailand Digital Arrival Card (offiziell, Immigration Bureau)</a> · <a href="https://www.wochenblitz.com/ratgeber-90-tage-report-und-tm30-meldung/">Ratgeber: 90-Tage-Report und TM30-Meldung</a> · <a href="https://thaifreu.de/thailand/aufenthaltsverlaengerung/">Aufenthaltsverlängerung und Re-Entry Permit</a></li>
+        <li><span class="k">Alltag: Führerschein, Erbrecht, Botschaft</span><a href="https://bangkok.diplo.de/th-de/service/fuehrerschein-1352806">Deutsche Botschaft Bangkok — Führerschein</a> · <a href="https://bangkok.diplo.de/th-de/service/erbrecht/1407740">Deutsche Botschaft Bangkok — Erbrecht</a> · <a href="https://www.wochenblitz.com/tod-in-thailand-was-angehoerige-ueber-konto-haus-und-testament-wissen-muessen/">Erbrecht in Thailand: Konto, Haus und Testament</a> · <a href="https://www.deutsche-im-ausland.org/im-ausland-leben-und-arbeiten/leben-im-ausland/laendersteckbriefe/expat-laendersteckbrief-thailand.html">Deutsche im Ausland — Länderprofil Thailand</a></li>
+        <li><span class="k">Lebenshaltungskosten</span><a href="https://www.wochenblitz.com/lebenshaltungskosten-thailand-2026-was-rentner-brauchen/">Lebenshaltungskosten Thailand 2026: Was Rentner brauchen</a> · <a href="https://asterofasia.com/de/blog/cost-of-living-thailand-foreigner-2026">Kostenvergleich Bangkok, Phuket, Chiang Mai 2026</a> · <a href="https://auswandern-info.com/thailand/lebenshaltungskosten/">Lebenshaltungskosten und Mieten Thailand 2026</a></li>
+      </ul>
+    </div>
+  </div>
+</article>
+
+<footer class="small">
+  <p>Zusammengestellt am 3. September 2026 aus öffentlich zugänglichen Quellen. Visa-Anforderungen, Deckungssummen und Steuerregeln ändern sich häufig, und einzelne Immigration-Büros legen Nachweise unterschiedlich aus — die Beträge sind vor dem Antrag beim zuständigen Konsulat oder Immigration-Büro zu bestätigen. Dies ist eine Recherche, keine Rechts-, Steuer- oder Versicherungsberatung.</p>
+</footer>
+</body>
+</html>

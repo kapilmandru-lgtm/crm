@@ -7,6 +7,7 @@ und dem daraus erzeugten A4-PDF.
 | Dokument | Thema |
 | --- | --- |
 | `thailand-condo-erwerb-rumaenische-gesellschaft` | Dürfen rumänische Gesellschaften in Thailand Eigentumswohnungen kaufen? Rechtsgrundlage, 49-%-Quote, Devisennachweis, Verfahren, Kosten, Vermietung, Reformstand. |
+| `thailand-leben-als-deutscher` | Als Deutscher dauerhaft in Thailand leben: die sieben Visa-Wege im Vergleich, Budget, Krankenversicherung, Steuern samt Doppelbesteuerungsabkommen, deutsche Seite, Meldepflichten, Fahrplan. |
 
 ## PDF neu erzeugen
 
