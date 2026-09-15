@@ -5,6 +5,7 @@
 **Typ:** Erstgespräch / Bewerbungsinterview für eine Rolle als Senior SAP Consultant (EWM/TM/SD) im Miele-Transformationsprogramm
 **Aufnahme:** Bildschirm + Ton, lokal abgelegt unter `meeting notes/Aufnahmen/2026-09-10_11-10_Interview.mp4`
 **Quelle:** automatisch transkribiertes Word-Dokument (`20260910_1110_Interview.docx`), Volltranskript siehe Anhang
+**Folgegespräch:** [2026-09-14 – NTT Gespräch 2: Vorbereitung Referenzprojekte](./2026-09-14-NTT-Gespraech-2-Miele-Vorbereitung.md)
 
 ## Zusammenfassung
 
