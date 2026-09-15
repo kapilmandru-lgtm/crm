@@ -16,10 +16,10 @@ Ich habe als Teammitglied im Requirement Gathering angefangen und bin aufgrund m
 
 Ein zentrales Problem in Shangjiagang: 40 bis 50 3PL-Lager, gemischt für Inbound und Outbound genutzt. Das führte zu massiven Verzögerungen, weil beide Bewegungsrichtungen zeitgleich stattfanden. Mein Vorschlag, der umgesetzt wurde: strikte Trennung in dedizierte Inbound- und Outbound-3PLs.
 
-- **Outbound:** Yard Management, Freight Unit Building, Routenoptimierung und Konsolidierung von Sendungen.
+- **Outbound (SAP TM):** Auf der Outbound-Seite habe ich den kompletten Prozess in SAP TM verantwortet. Die Auslieferungen aus dem ERP werden zu **Freight Units** gebündelt (Frachteinheitenbildung), über **Route Optimization/Konsolidierung** zu möglichst vollen Ladungen zusammengeführt und daraus **Freight Orders** erzeugt – inklusive Spediteurauswahl und Tender-Prozess. Auf dem Werksgelände selbst habe ich zusätzlich **Yard Management** verantwortet, also die Steuerung der LKWs auf dem Hof – Andockzeiten an den Toren, Reihenfolge der Be-/Entladung, Rückmeldung an TM, sobald ein Fahrzeug abfahrbereit ist. Das Zusammenspiel aus Freight-Unit-Building, Konsolidierung und Yard Management war genau der Hebel, mit dem wir die Outbound-Verzögerungen aus dem gemischten 3PL-Setup beseitigt haben.
 - **Inbound:** automatisiertes Replenishment – der 3PL überwacht proaktiv die Bestände und liefert selbstständig nach, statt wie vorher über Zettelwirtschaft und Telefonate. Wareneingänge und -ausgänge liefen auf beiden Seiten nur noch per Scan, ganz ohne manuelle Buchung.
 
-Wichtig dabei: Auf Wunsch der Projektleitung sind wir konsequent im SAP-Standard geblieben – aus früheren Sonderlösungen wusste man, wie schwer es ist, die später wieder zurück in den Standard zu bringen.
+Wichtig dabei: Auf Wunsch der Projektleitung sind wir konsequent im SAP-Standard geblieben – aus früheren Sonderlösungen wusste man, wie schwer es ist, die später wieder zurück in den Standard zu bringen. Das galt auch für TM: Freight-Unit-Building, Route Optimization und Yard Management liefen alle auf Standardprozessen, ohne kundenspezifische Sonderlogik.
 
 Auf der Architekturseite habe ich die Integration zwischen ERP und EWM verantwortet: Einkaufsbestellungen werden in MM gebucht (MIGO) und automatisch an EWM übergeben; Produktionsversorgungsbereiche (PVB/PSA) werden von ERP und MES getriggert, EWM beliefert automatisch – die Schnittstelle einmalig über EDI oder API aufgesetzt. Je nach Werk haben wir drei verschiedene Nachschub-Logiken produktiv eingesetzt: klassisches Replenishment, Min-Max und Kanban.
 
@@ -29,4 +29,4 @@ Das Werk wurde erfolgreich live gebracht, die Trennung von Inbound und Outbound 
 
 ---
 
-*(≈ 350 Wörter / ca. 3 Minuten in normalem Sprechtempo – bewusst knapper als das erlaubte Maximum von 5–6 Minuten gehalten, damit im Interview noch Raum für Rückfragen bleibt. Bei Bedarf um weitere Details zu Testing/Dokumentation/Key-User-Training ergänzbar.)*
+*(≈ 480 Wörter / ca. 4 Minuten in normalem Sprechtempo – lässt im Interview noch Raum für Rückfragen zum erlaubten Maximum von 5–6 Minuten. Bei Bedarf um weitere Details zu Testing/Dokumentation/Key-User-Training ergänzbar.)*
