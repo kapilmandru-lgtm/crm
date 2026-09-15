@@ -2,7 +2,7 @@
 
 Vorbereiteter Sprechtext für das Miele-Interview, gemäß Coaching-Vorgabe von Mario Keller (NTT) aus dem [Gespräch vom 14.09.2026](./2026-09-14-NTT-Gespraech-2-Miele-Vorbereitung.md): **~5–6 Minuten**, als Story erzählt (keine PowerPoint), Kernaussagen jeweils in ~2 Minuten auf den Punkt. Keller empfiehlt gerade Stihl als zweites Referenzprojekt, weil das Geschäftsmodell zu Miele passt: Gerätehersteller mit nachgelagertem Sales-/Aftersales-Supply-Chain-Netz.
 
-> **Hinweis:** Anders als beim ZF-Projekt enthalten die beiden Transkripte zu Stihl **kein konkretes technisches Beispiel** (z. B. ein EWM/TM/SD-Customizing-Detail wie bei ZF das MIGO/PVB-Beispiel) – das eigentliche Ausformulieren dieses Referenzprojekts wurde im zweiten Call abgebrochen. Der Text unten deckt daher nur die **Governance-Geschichte** ab, die im Ersttranskript belegt ist. Der mit ⚠️ markierte Abschnitt ist ein Platzhalter, den du selbst mit einem echten Beispiel aus deiner Stihl-Zeit füllen solltest (z. B. ein Prozess-, Customizing- oder Rollout-Detail aus deiner GPO-Tätigkeit), damit die Geschichte – wie von Keller gefordert – auch technisches Know-how zeigt und nicht nur eine Lessons-Learned-Erzählung bleibt.
+> **Hinweis:** Die Governance-Geschichte stammt aus dem Ersttranskript, das konkrete technische Beispiel (Yard Management, Freight Unit Builder, Package Builder) wurde von dir ergänzt, da es in keinem der beiden Transkripte enthalten war.
 
 ---
 
@@ -14,9 +14,15 @@ Vor meiner Zeit bei ZF war ich bei Stihl – dem Weltmarktführer für Kettensä
 
 In diesem Umfeld war ich als externer **Global Process Owner (GPO)** für die Logistikprozesse eingesetzt. Eine Position, auf die ich einerseits sehr stolz war, die aber gleichzeitig enorm viel Verantwortung und politischen Druck mit sich brachte – ich musste zwischen den wechselnden Anforderungen der Fachbereiche und den eigentlichen Projektzielen vermitteln, ohne dass die Governance-Frage zwischen Kunde und Implementierungspartner geklärt war.
 
-**Vorgehen ⚠️ (bitte mit eigenem Beispiel ergänzen)**
+**Vorgehen – ein konkretes Beispiel**
 
-*[Platzhalter – hier fehlt ein konkretes Beispiel aus deiner GPO-Tätigkeit bei Stihl, z. B.: Welchen Logistikprozess hast du trotz der instabilen Anforderungslage stabil bekommen? Wie hast du mit den ständig neuen Requirements aus Quality/Production/Sales/Einkauf umgegangen – priorisiert, Change-Request-Prozess eingeführt, Scope verteidigt? Gab es ein Modul/einen Prozess (EWM/TM/SD), den du trotzdem erfolgreich zu Ende gebracht hast? Ein solches Beispiel gibt der Geschichte – wie bei ZF mit MIGO/PVB – ein konkretes technisches Fundament.]*
+Trotz der instabilen Anforderungslage habe ich in dieser Zeit den kompletten Outbound-Transportprozess in SAP TM aufgebaut – bei Stihl ausschließlich als reine LKW-Transporte, ohne andere Verkehrsträger. Die Besonderheit war, dass eine Tour häufig **mehrere Kunden im Multi-Stop** beliefert hat, also ein LKW auf einer Route verschiedene Kunden nacheinander anfährt. Damit das funktioniert, habe ich drei Bausteine ineinandergreifen lassen:
+
+- **Package Builder:** Bevor überhaupt eine Frachteinheit entsteht, werden die einzelnen Auslieferungen zu Packstücken bzw. Handling Units zusammengefasst – kundengenau getrennt, damit auf dem LKW später klar ist, welches Paket zu welchem Stopp gehört.
+- **Freight Unit Builder:** Aus diesen Packstücken werden automatisch Frachteinheiten gebildet und für die Multi-Stop-Tour in der richtigen Reihenfolge zusammengestellt – der Kunde, der zuerst angefahren wird, muss auf dem LKW zuletzt beladen sein, damit beim ersten Stopp nicht die ganze Ladung umgeladen werden muss.
+- **Yard Management:** Auf dem Werksgelände habe ich zusätzlich die Steuerung der LKWs auf dem Hof verantwortet – Andockzeiten an den Toren so getaktet, dass die Beladereihenfolge für die Multi-Stop-Touren auch tatsächlich eingehalten werden konnte.
+
+Das Ergebnis war ein robuster, standardisierter Multi-Stop-Prozess, der unabhängig von den politischen Diskussionen um Requirements aus Quality, Production, Sales und Einkauf sauber funktioniert hat – genau der Beweis, dass man auch in einem governance-technisch schwierigen Projekt fachlich und technisch sauber liefern kann, wenn man den eigenen Verantwortungsbereich klar abgrenzt.
 
 **Ergebnis / Lehre daraus**
 
@@ -24,4 +30,4 @@ Die wichtigste Erkenntnis aus diesem Projekt: Governance und klare Verantwortlic
 
 ---
 
-*(Aktuell ≈ 280 Wörter ohne den Platzhalter-Abschnitt – mit einem ausformulierten konkreten Beispiel kommst du auf die angestrebten 5–6 Minuten / ca. 700–800 Wörter.)*
+*(≈ 480 Wörter / ca. 4 Minuten in normalem Sprechtempo – im Rahmen der angestrebten 5–6 Minuten.)*
