@@ -184,6 +184,9 @@
   body.role-user .projsel .prow button{display:none}
   body.role-user .projsel .pactions{display:none}
   body.role-user .teamnav{display:none!important}
+  body.local-mode .teamnav{display:none!important}
+  .logincard .loginsub{margin:0 0 14px;font-size:13px;color:var(--muted)}
+  .logincard .btn.block+.btn.block{margin-top:10px}
   .ttbl th,.ttbl td{padding:7px 10px;border-bottom:1px solid var(--line)}
   .ttbl thead th{border-bottom:2px solid var(--line);font-size:12px;color:var(--muted);font-weight:700}
   .ttbl tbody tr:hover{background:#f7f9fc}
@@ -196,12 +199,23 @@
 <div id="loginOverlay" class="loginov hide">
   <div class="logincard">
     <div class="loginlogo"></div>
-    <h2 id="loginTitle">Anmelden</h2>
-    <p class="loginmsg" id="loginMsg"></p>
-    <input id="loginEmail" type="email" placeholder="E-Mail" autocomplete="username">
-    <input id="loginPass" type="password" placeholder="Passwort" autocomplete="current-password">
-    <button class="btn block" id="loginBtn">Anmelden</button>
-    <div class="loginswitch">Noch kein Konto? <a id="loginToggle">Registrieren</a></div>
+    <div id="localBox" class="hide">
+      <h2>Mein CRM</h2>
+      <p class="loginsub">Deine Daten liegen in einem Ordner im Mandrudi-OneDrive (z. B. „CRM-Daten“) — alle Macs wählen denselben Ordner.</p>
+      <p class="loginmsg" id="localMsg"></p>
+      <button class="btn block hide" id="localResumeBtn"></button>
+      <button class="btn block" id="localOpenBtn">📂 OneDrive-Ordner wählen</button>
+      <div class="loginswitch"><a id="cloudShow">Alte Cloud-Daten übertragen (Login)</a></div>
+    </div>
+    <div id="cloudBox">
+      <h2 id="loginTitle">Anmelden</h2>
+      <p class="loginmsg" id="loginMsg"></p>
+      <input id="loginEmail" type="email" placeholder="E-Mail" autocomplete="username">
+      <input id="loginPass" type="password" placeholder="Passwort" autocomplete="current-password">
+      <button class="btn block" id="loginBtn">Anmelden</button>
+      <div class="loginswitch">Noch kein Konto? <a id="loginToggle">Registrieren</a></div>
+      <div class="loginswitch"><a id="localShow">← Zurück zum OneDrive-Ordner</a></div>
+    </div>
   </div>
 </div>
 <div class="app">
@@ -220,7 +234,7 @@
     <div class="storage" id="storageBox">
       <div class="langsel"><select id="langDrop" onchange="setLang(this.value)"></select></div>
       <div class="st-row"><span class="st-dot"></span><span class="lbl-t" id="storageLbl">Nicht verbunden</span></div>
-      <button class="btn ghost sm block" id="connectBtn" data-i18n="s_conn">OneDrive-Datei verbinden</button>
+      <button class="btn ghost sm block" id="connectBtn">OneDrive-Ordner…</button>
     </div>
   </aside>
 
@@ -347,7 +361,7 @@ function renderProjectSel(){const el=$("#projsel");if(!el||!store)return;
     <div class="prow"><select id="projDrop" onchange="switchProject(this.value)">${store.projects.map(p=>`<option value="${p.id}" ${p.id===store.current?"selected":""}>${esc(p.name)}</option>`).join("")}</select>
     <button title="Neues Projekt starten" onclick="promptNewProject()">+</button></div>
     <div class="pactions"><span onclick="renameProject('${store.current}')">${tr("p_rename")}</span><span onclick="stagesForm()" title="Pipeline-Phasen dieses Projekts benennen">⚙ Phasen</span><span onclick="deleteProject('${store.current}')">${tr("p_delete")}</span></div>`;}
-let fileHandle=null, state={view:"dashboard",search:""}, saveTimer=null;
+let state={view:"dashboard",search:""}, saveTimer=null;
 let sel=new Set(), visibleIds=[];
 let hiddenStages=new Set(JSON.parse(localStorage.getItem("hiddenStages")||"[]"));
 function toggleStage(id){hiddenStages.has(id)?hiddenStages.delete(id):hiddenStages.add(id);
@@ -522,10 +536,11 @@ function idb(){return new Promise((res,rej)=>{const r=indexedDB.open("crm-store"
 async function idbSet(k,v){const d=await idb();return new Promise(r=>{const t=d.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=r;});}
 async function idbGet(k){const d=await idb();return new Promise(r=>{const t=d.transaction("kv","readonly");const q=t.objectStore("kv").get(k);q.onsuccess=()=>r(q.result);});}
 
-function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(save,400);}
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{saveTimer=null;save();},400);}
 async function save(){
   if(store)localStorage.setItem("crm-data",JSON.stringify(store)); // lokales Backup
   if(sb&&authUser&&store&&store.current) return sbSave();
+  if(dataDir&&dirReady) return syncDir();
 }
 
 /* ===== Supabase Backend (Login + echte Rechte) ===== */
@@ -544,7 +559,7 @@ const acIn=r=>({id:r.id,createdAt:r.created_at,title:r.title||"",type:r.type||"t
 const acOut=(a,pid)=>({id:a.id,project_id:pid,title:a.title||"",type:a.type||"task",due_date:a.dueDate||null,done:!!a.done,contact_id:a.contactId||null,deal_id:a.dealId||null,notes:a.notes||""});
 function setAuthMode(m){authMode=m;const v={login:["Anmelden","Anmelden","Registrieren"],signup:["Konto erstellen","Registrieren","Zurück zur Anmeldung"]}[m];
   $("#loginTitle").textContent=v[0];$("#loginBtn").textContent=v[1];$("#loginToggle").textContent=v[2];$("#loginMsg").textContent="";}
-function showLogin(msg){$("#loginOverlay").classList.remove("hide");if(msg){$("#loginMsg").style.color="var(--red)";$("#loginMsg").textContent=msg;}}
+function showLogin(msg){$("#loginOverlay").classList.remove("hide");$("#localBox").classList.add("hide");$("#cloudBox").classList.remove("hide");if(msg){$("#loginMsg").style.color="var(--red)";$("#loginMsg").textContent=msg;}}
 function hideLogin(){$("#loginOverlay").classList.add("hide");}
 function fmtAuthErr(e){const m=(e&&e.message)||String(e);
   if(/Invalid login/i.test(m))return "E-Mail oder Passwort falsch.";
@@ -752,35 +767,205 @@ window.doAuth=doAuth;window.doLogout=doLogout;window.setAuthMode=setAuthMode;
 function loadLocal(){let raw=null;try{raw=JSON.parse(localStorage.getItem("crm-data"));}catch(e){}
   store=migrate(raw);useProject(store.current);}
 
-async function connectFile(existing){
-  if(!window.showSaveFilePicker){
-    alert("Automatisches Speichern braucht Chrome oder Edge. In Safari nutze bitte Export/Import.");return;}
+/* ===== Lokaler Modus: Daten in einem gemeinsamen Ordner im Mandrudi-OneDrive =====
+   Jeder Mac schreibt nur seine eigene Datei (geraet-<id>.json) und liest die Dateien der anderen Macs.
+   So bekommt OneDrive nie zwei Schreiber auf dieselbe Datei. Pro Datensatz gewinnt die neueste Änderung;
+   Löschungen werden mit Zeitstempel mitgeführt, damit sie nicht von einem anderen Mac zurückkommen. */
+const hasFS=!!window.showDirectoryPicker;
+const FILE_TYPES=[{description:"CRM Daten",accept:{"application/json":[".json"]}}];
+const COLLS=["contacts","companies","deals","activities"], DEV_RX=/^geraet-.+\.json$/;
+const deviceId=(()=>{let d=localStorage.getItem("crm-device");if(!d){d=uid().replace(/-/g,"").slice(0,12);localStorage.setItem("crm-device",d);}return d;})();
+const ownFile="geraet-"+deviceId+".json";
+let dataDir=null, pendingDir=null, dirReady=false, dirBusy=false, dirAgain=false, ownStale=false;
+let known=new Map();   // Schlüssel → {t, r: Datensatz} bzw. {t, d:1} (gelöscht) — Stand über alle Macs
+let view=new Map();    // Schlüssel → Datensatz (kanonisch) beim letzten Abgleich — Basis für eigene Änderungen
+let seenFiles={};      // Dateiname → lastModified der zuletzt gelesenen Fassung
+/* Vergleich unabhängig von der Feld-Reihenfolge */
+const canon=v=>JSON.stringify(v,(k,x)=>x&&typeof x==="object"&&!Array.isArray(x)?Object.keys(x).sort().reduce((o,k2)=>(o[k2]=x[k2],o),{}):x);
+/* Store ↔ flache Einträge: p/<projekt> und r/<projekt>/<sammlung>/<id> */
+function flatten(s){const m=new Map();
+  for(const p of s.projects){m.set("p/"+p.id,p);const d=s.data[p.id]||{};
+    for(const c of COLLS)for(const r of d[c]||[]){if(!r.id)r.id=uid();m.set("r/"+p.id+"/"+c+"/"+r.id,r);}}
+  return m;}
+const viewOf=s=>new Map([...flatten(s)].map(([k,r])=>[k,canon(r)]));
+function rebuild(){
+  const projects=[], data={};
+  for(const [k,e] of known)if(!e.d&&k.startsWith("p/")){projects.push(e.r);data[e.r.id]=blankData();}
+  if(!projects.length)return;
+  for(const [k,e] of known){if(e.d||!k.startsWith("r/"))continue;const a=k.split("/");
+    if(data[a[1]]&&data[a[1]][a[2]])data[a[1]][a[2]].push(e.r);}
+  const cur=store&&store.current;
+  store={v:2,projects,current:projects.some(p=>p.id===cur)?cur:projects[0].id,data};useProject(store.current);
+  view=viewOf(store);
+}
+/* Eigene Änderungen seit dem letzten Abgleich mit Zeitstempel versehen; true, wenn es welche gab */
+function stampLocal(){
+  const cur=flatten(store), now=Date.now(); let n=0;
+  const tick=k=>Math.max(now,((known.get(k)||{}).t||0)+1); // auch bei leicht falsch gehender Mac-Uhr gewinnt die eigene neue Änderung
+  for(const [k,r] of cur){const c=canon(r);if(view.get(k)!==c){known.set(k,{t:tick(k),r});view.set(k,c);n++;}}
+  for(const k of [...view.keys()])if(!cur.has(k)){known.set(k,{t:tick(k),d:1});view.delete(k);n++;}
+  return n>0;
+}
+/* Einträge eines anderen Macs übernehmen, wo sie neuer sind; true, wenn sich dadurch etwas geändert hat */
+function absorb(entries){let n=0;
+  for(const k in entries){const e=entries[k],m=known.get(k);
+    if(!m||e.t>m.t||(e.t===m.t&&canon(e)>canon(m))){known.set(k,e);n++;}}
+  return n>0;}
+async function readDevices(dir,skipOwn){let changed=false;
+  for await(const [name,h] of dir.entries()){
+    if(h.kind!=="file"||!DEV_RX.test(name)||(skipOwn&&name===ownFile))continue;
+    const f=await h.getFile();if(seenFiles[name]===f.lastModified)continue;
+    try{if(absorb(JSON.parse(await f.text()).entries||{}))changed=true;seenFiles[name]=f.lastModified;}
+    catch(e){} // Datei wird gerade von OneDrive geladen → beim nächsten Abgleich
+  }
+  return changed;}
+async function writeOwn(){
+  const h=await dataDir.getFileHandle(ownFile,{create:true}), w=await h.createWritable();
+  await w.write(JSON.stringify({v:3,device:deviceId,savedAt:Date.now(),entries:Object.fromEntries(known)}));await w.close();
+}
+async function syncDir(){
+  if(!dataDir||!dirReady)return;
+  if(dirBusy){dirAgain=true;return;}
+  dirBusy=true;
   try{
-    let h;
-    if(existing){[h]=await window.showOpenFilePicker({types:[{description:"CRM Daten",accept:{"application/json":[".json"]}}]});}
-    else{h=await window.showSaveFilePicker({suggestedName:"crm-daten.json",
-      types:[{description:"CRM Daten",accept:{"application/json":[".json"]}}]});}
-    fileHandle=h; await idbSet("fileHandle",h);
-    if(existing){const f=await h.getFile();const txt=await f.text();
-      if(txt.trim()){store=migrate(JSON.parse(txt));useProject(store.current);}}
-    await save(); renderAll(); toast(existing?"Datei geladen":"Datei verbunden — wird jetzt automatisch gespeichert");
+    let mine=stampLocal();
+    if(await readDevices(dataDir,true)){mine=stampLocal()||mine;rebuild();renderAll();toast(tr("rt_updated"));}
+    if(mine||ownStale){await writeOwn();ownStale=false;}
+    localStorage.setItem("crm-data",JSON.stringify(store));
+    setStorage(true);
+  }catch(e){console.warn(e);setStorage(false,"OneDrive-Ordner nicht erreichbar");}
+  dirBusy=false;
+  if(dirAgain){dirAgain=false;syncDir();}
+}
+/* Änderungen der anderen Macs übernehmen: alle 15 s und beim Zurückkehren ins Fenster */
+function dirCheck(){if(!document.hidden&&!saveTimer)syncDir();}
+setInterval(dirCheck,15000);
+window.addEventListener("focus",dirCheck);
+document.addEventListener("visibilitychange",dirCheck);
+window.addEventListener("pagehide",()=>{if(saveTimer){clearTimeout(saveTimer);saveTimer=null;save();}});
+/* Ordner als Datenquelle übernehmen. Leerer Ordner → aktueller Stand wird hineingeschrieben.
+   merge=true (Umzug aus der Cloud): eigene Datensätze, die im Ordner fehlen, werden ergänzt. */
+async function useDir(h,merge){
+  known=new Map();view=new Map();seenFiles={};
+  await readDevices(h,false);
+  if(merge){const now=Date.now();for(const [k,r] of flatten(store))if(!known.has(k)){known.set(k,{t:now,r});ownStale=true;}}
+  rebuild(); // leerer Ordner: store bleibt, view leer → beim Abgleich wird alles als eigene Änderung geschrieben
+  dataDir=h;dirReady=true;
+  try{await idbSet("dataDir",h);}catch(e){}
+  document.body.classList.add("local-mode");document.body.classList.remove("role-user");
+  hideLogin();sel.clear();renderAll();
+  await syncDir();
+}
+async function leaveCloud(){
+  try{if(rtChannel)sb.removeChannel(rtChannel);}catch(e){}
+  rtChannel=null;rtReady=false;rtStatus="";authUser=null;myRole="user";
+  try{await sb.auth.signOut({scope:"local"});}catch(e){}
+}
+async function connectDir(){
+  if(!hasFS){alert("Der OneDrive-Ordner braucht Chrome oder Edge — Safari kann Dateien nicht direkt speichern.");return;}
+  try{
+    const h=await window.showDirectoryPicker({id:"crm-daten",mode:"readwrite"});
+    const fromCloud=!!authUser;
+    if(fromCloud)await leaveCloud(); // Umzug: Cloud-Stand landet im Ordner, danach nur noch lokal
+    await useDir(h,fromCloud);
+    toast("OneDrive-Ordner „"+h.name+"“ verbunden");
   }catch(e){if(e.name!=="AbortError")alert("Fehler: "+e.message);}
 }
-async function verifyPerm(h){
-  const opts={mode:"readwrite"};
-  if((await h.queryPermission(opts))==="granted")return true;
-  if((await h.requestPermission(opts))==="granted")return true;
-  return false;
+function showLocal(h,msg){
+  pendingDir=h||null;
+  $("#loginOverlay").classList.remove("hide");$("#localBox").classList.remove("hide");$("#cloudBox").classList.add("hide");
+  const r=$("#localResumeBtn");r.classList.toggle("hide",!h);$("#localOpenBtn").classList.toggle("sec",!!h);
+  if(h)r.textContent="▶ Weiter mit „"+h.name+"“";
+  $("#localMsg").textContent=msg||(hasFS?"":"Bitte in Chrome oder Edge öffnen — Safari kann Dateien nicht direkt speichern.");
+  $("#localOpenBtn").disabled=!hasFS;
 }
-async function tryReconnect(){
-  const h=await idbGet("fileHandle");if(!h)return;
-  if(await verifyPerm(h)){fileHandle=h;try{const f=await h.getFile();const txt=await f.text();
-    if(txt.trim()){store=migrate(JSON.parse(txt));useProject(store.current);}}catch(e){}
-    setStorage(true,"Synchronisiert");renderAll();}
-  else{setStorage(false,"Klicke zum Verbinden");}
+async function resumeDir(){
+  const h=pendingDir;if(!h)return;
+  try{if((await h.requestPermission({mode:"readwrite"}))!=="granted")return;await useDir(h,false);}
+  catch(e){showLocal(null,"„"+h.name+"“ konnte nicht geöffnet werden — bitte neu auswählen.");}
 }
-function setStorage(ok,label){const b=$("#storageBox");b.classList.toggle("ok",!!ok);$("#storageLbl").textContent=tr(ok?"s_sync":"s_disc");
-  $("#connectBtn").textContent=tr(ok?"s_other":"s_conn"); if(ok&&typeof setRtBadge==='function')setRtBadge();}
+async function importBackup(){
+  let h;try{[h]=await window.showOpenFilePicker({types:FILE_TYPES});}catch(e){return;}
+  try{const raw=JSON.parse(await (await h.getFile()).text());
+    if(!confirm("„"+h.name+"“ einlesen? Die aktuellen Daten werden auf allen Macs durch das Backup ersetzt."))return;
+    const cur=store.current;store=migrate(raw);if(store.data[cur])store.current=cur;useProject(store.current);
+    sel.clear();save();renderAll();toast("Backup eingelesen");}
+  catch(e){alert("Backup konnte nicht gelesen werden: "+e.message);}
+}
+async function storageMenu(){
+  if(authUser)return openModal(`
+    <div class="mh"><h3>Cloud → OneDrive</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb"><p class="muted" style="margin-top:0">Überträgt <b>alle Projekte</b> aus der Cloud in einen Ordner in deinem Mandrudi-OneDrive (z. B. „CRM-Daten“). Danach arbeitet dieser Mac nur noch mit dem Ordner — auf den anderen Macs wählst du einfach denselben Ordner.</p>
+      <button class="btn block" onclick="closeModal();connectDir()">📁 Jetzt in OneDrive-Ordner übertragen</button></div>
+    <div class="mf"><button class="btn sec" onclick="doLogout()">Abmelden</button><button class="btn sec" onclick="closeModal()">Schließen</button></div>`);
+  if(!dataDir)return connectDir();
+  let devices=0;try{for await(const [n,h] of dataDir.entries())if(h.kind==="file"&&DEV_RX.test(n))devices++;}catch(e){}
+  openModal(`
+    <div class="mh"><h3>OneDrive-Ordner</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="kv"><div class="k">Daten</div><div class="v">${esc(dataDir.name)} <span class="muted">· ${devices} Mac(s)/Browser</span></div></div>
+      <div class="kv"><div class="k">Dokumente</div><div class="v">${esc(docsDir?docsDir.name:"— noch kein Ordner")}</div></div>
+      <p class="muted" style="font-size:13px">Alle Macs wählen denselben Ordner im Mandrudi-OneDrive. Jeder Mac speichert dort seine eigene Datei; Änderungen der anderen Macs werden automatisch übernommen.</p>
+      <button class="btn sec block" onclick="closeModal();connectDir()">📂 Anderen Ordner wählen</button>
+      <button class="btn sec block" style="margin-top:10px" onclick="closeModal();chooseDocsDir()">📎 Dokumente-Ordner (DokuApp) wählen</button>
+      <button class="btn sec block" style="margin-top:10px" onclick="closeModal();importBackup()">📥 JSON-Backup einlesen</button>
+    </div>
+    <div class="mf"><button class="btn sec" onclick="closeModal()">Schließen</button></div>`);
+}
+window.connectDir=connectDir;window.storageMenu=storageMenu;window.importBackup=importBackup;
+
+/* ===== Dokumente aus dem OneDrive-Ordner der DokuApp verknüpfen =====
+   Gespeichert wird nur der Pfad relativ zum Dokumente-Ordner — so findet jeder Mac die Datei in seinem OneDrive wieder. */
+let docsDir=null;
+idbGet("docsDir").then(h=>{if(h)docsDir=h;}).catch(()=>{});
+async function chooseDocsDir(){
+  try{docsDir=await window.showDirectoryPicker({id:"doku",mode:"read"});await idbSet("docsDir",docsDir);toast("Dokumente-Ordner: "+docsDir.name);return docsDir;}
+  catch(e){if(e.name!=="AbortError")alert("Fehler: "+e.message);return null;}
+}
+async function getDocsDir(){
+  if(!docsDir){toast("Einmalig: Dokumente-Ordner der DokuApp im Mandrudi-OneDrive wählen");return chooseDocsDir();}
+  try{if((await docsDir.queryPermission({mode:"read"}))==="granted"||(await docsDir.requestPermission({mode:"read"}))==="granted")return docsDir;}catch(e){}
+  return null;
+}
+function docsSection(kind,rec){
+  if(!rec||!rec.id||!dataDir||authUser)return "";
+  const list=(rec.docs||[]).map((d,i)=>`<div class="kv"><div class="v"><a class="link" style="cursor:pointer" onclick="openDoc('${kind}','${rec.id}',${i})">📄 ${esc(d.name)}</a>
+      <div class="muted" style="font-size:11.5px;font-weight:400">${esc(d.path)}</div></div>
+      <button class="btn sm sec" title="Verknüpfung entfernen" onclick="unlinkDoc('${kind}','${rec.id}',${i})">✕</button></div>`).join("");
+  return `<div class="detail-sec" id="docsSec"><h4>Dokumente (DokuApp)</h4>
+    ${list||'<div class="muted" style="font-size:13px">Noch keine Dokumente verknüpft.</div>'}
+    <button class="btn sm sec" style="margin-top:8px" onclick="linkDoc('${kind}','${rec.id}')">📎 Dokument verknüpfen</button></div>`;
+}
+function refreshDocs(kind,id){const el=$("#docsSec"),rec=byId(db[kind],id);if(el&&rec)el.outerHTML=docsSection(kind,rec);}
+async function linkDoc(kind,id){
+  const dir=await getDocsDir();if(!dir)return;
+  let picked;try{picked=await window.showOpenFilePicker({multiple:true,startIn:dir});}
+  catch(e){if(e.name==="SecurityError")toast("Bitte nochmal auf „Dokument verknüpfen“ klicken");return;}
+  const rec=byId(db[kind],id);if(!rec)return;rec.docs=rec.docs||[];
+  let n=0,outside=0;
+  for(const h of picked){const p=await dir.resolve(h);if(!p){outside++;continue;}
+    const path=p.join("/");if(!rec.docs.some(d=>d.path===path)){rec.docs.push({path,name:h.name});n++;}}
+  if(n)scheduleSave();refreshDocs(kind,id);
+  if(outside)alert(outside+" Datei(en) liegen nicht im Dokumente-Ordner „"+dir.name+"“ und wurden nicht verknüpft.");
+  else if(n)toast(n+" Dokument(e) verknüpft");
+}
+async function openDoc(kind,id,i){
+  const rec=byId(db[kind],id),d=rec&&rec.docs&&rec.docs[i];if(!d)return;
+  const dir=await getDocsDir();if(!dir)return;
+  let f;
+  try{const parts=d.path.split("/");let cur=dir;for(const p of parts.slice(0,-1))cur=await cur.getDirectoryHandle(p);
+    f=await (await cur.getFileHandle(parts[parts.length-1])).getFile();}
+  catch(e){alert("Dokument nicht gefunden:\n"+d.path+"\n\nWurde es in der DokuApp verschoben oder umbenannt?");return;}
+  const url=URL.createObjectURL(f);
+  // PDFs/Bilder im neuen Tab; alles andere (oder wenn der Tab blockiert wird) als Download
+  if(!(/^(application\/pdf|image\/|text\/)/.test(f.type)&&window.open(url,"_blank"))){const a=document.createElement("a");a.href=url;a.download=f.name;a.click();}
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+function unlinkDoc(kind,id,i){const rec=byId(db[kind],id);if(!rec||!rec.docs)return;rec.docs.splice(i,1);scheduleSave();refreshDocs(kind,id);}
+window.chooseDocsDir=chooseDocsDir;window.linkDoc=linkDoc;window.openDoc=openDoc;window.unlinkDoc=unlinkDoc;
+function setStorage(ok,label){const b=$("#storageBox");b.classList.toggle("ok",!!ok);
+  $("#storageLbl").textContent=(dataDir&&!authUser)?(ok?"OneDrive · "+dataDir.name:(label||tr("s_disc"))):tr(ok?"s_sync":"s_disc");
+  $("#connectBtn").textContent=authUser?"In OneDrive übertragen…":"OneDrive-Ordner…"; if(ok&&typeof setRtBadge==='function')setRtBadge();}
 
 /* ============================ Helpers ============================ */
 const byId=(arr,id)=>arr.find(x=>x.id===id);
@@ -1153,9 +1338,10 @@ function openCompany(id){const c=byId(db.companies,id);const cts=db.contacts.fil
       ${c.notes?`<div class="detail-sec"><h4>Notizen</h4><div>${esc(c.notes)}</div></div>`:""}
       ${cts.length?`<div class="detail-sec"><h4>Kontakte (${cts.length})</h4>${cts.map(x=>`<div class="kv"><div class="v">${esc(x.firstName)} ${esc(x.lastName)}</div><div class="muted">${esc(x.position||"")}</div></div>`).join("")}</div>`:""}
       ${deals.length?`<div class="detail-sec"><h4>Deals (${deals.length})</h4>${deals.map(d=>`<div class="kv"><div class="v">${esc(d.title)}</div><div class="right"><span class="pill" style="background:${stageOf(d.stage).color}22;color:${stageOf(d.stage).color}">${stageOf(d.stage).name}</span> <b>${eur(d.value)}</b></div></div>`).join("")}</div>`:""}
+      ${docsSection("companies",c)}
     </div>
     <div class="mf"><button class="btn sec" onclick="closeModal()">Schließen</button>
-      <button class="btn" onclick='companyForm(${JSON.stringify(c)})'>Bearbeiten</button></div>`);}
+      <button class="btn" onclick="companyForm(byId(db.companies,'${c.id}'))">Bearbeiten</button></div>`);}
 
 /* ---- Deal ---- */
 function dealForm(d={}){openModal(`
@@ -1170,7 +1356,7 @@ function dealForm(d={}){openModal(`
       <div class="fld"><label>Abschlussdatum</label><input name="closeDate" type="date" value="${esc(d.closeDate)}"></div></div>
     <div class="fld"><label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-weight:600"><input type="checkbox" name="done" ${d.done?"checked":""} style="width:17px;height:17px;accent-color:var(--green)"> Als erledigt markieren</label></div>
     <div class="fld"><label>Notizen</label><textarea name="notes">${esc(d.notes)}</textarea></div>
-  </form></div>
+  </form>${docsSection("deals",d)}</div>
   <div class="mf">${d.id?`<button class="btn danger" onclick="delDeal('${d.id}')">Löschen</button><button class="btn sec" onclick="followUpDeal('${d.id}')">↻ Follow-up</button>`:""}
     <button class="btn sec" onclick="closeModal()">Abbrechen</button>
     <button class="btn" onclick="document.getElementById('f').requestSubmit()">Speichern</button></div>`);}
@@ -1626,7 +1812,7 @@ function csvCell(v){v=v==null?"":String(v);return /[",;\n]/.test(v)?'"'+v.replac
 function toCSV(rows,cols){const head=cols.map(c=>csvCell(c.label)).join(",");
   const body=rows.map(r=>cols.map(c=>csvCell(c.get(r))).join(",")).join("\n");return "﻿"+head+"\n"+body;}
 function ymd(){return new Date().toISOString().slice(0,10);}
-function exportJSON(){download(`crm-backup-${ymd()}.json`,JSON.stringify(db,null,2),"application/json");toast("Backup gespeichert");}
+function exportJSON(){download(`crm-backup-${ymd()}.json`,JSON.stringify(store,null,2),"application/json");toast("Backup gespeichert");}
 function exportContactsCSV(){download(`kontakte-${ymd()}.csv`,toCSV(db.contacts,[
   {label:"Vorname",get:c=>c.firstName},{label:"Nachname",get:c=>c.lastName},{label:"Firma",get:c=>companyName(c.companyId)},
   {label:"Position",get:c=>c.position},{label:"E-Mail",get:c=>c.email},{label:"Telefon",get:c=>c.phone},
@@ -1650,7 +1836,7 @@ function exportMenu(){openModal(`
       <button class="btn sec block" onclick="exportCompaniesCSV()">Firmen (CSV)</button></div>
     <div class="row2" style="margin-top:10px"><button class="btn sec block" onclick="exportDealsCSV()">Deals (CSV)</button>
       <button class="btn sec block" onclick="exportActivitiesCSV()">Aktivitäten (CSV)</button></div>
-    <p class="muted" style="font-size:12px;margin-bottom:0">Das JSON-Backup kannst du über „OneDrive-Datei verbinden" → bestehende Datei jederzeit wieder einlesen.</p>
+    <p class="muted" style="font-size:12px;margin-bottom:0">Das JSON-Backup enthält alle Projekte und lässt sich unten links über „OneDrive-Ordner…“ → „JSON-Backup einlesen“ wieder einspielen.</p>
   </div>
   <div class="mf"><button class="btn sec" onclick="closeModal()">Schließen</button></div>`);}
 
@@ -1776,15 +1962,11 @@ $("#addBtn").addEventListener("click",()=>({contacts:contactForm,companies:compa
 $("#importBtn").addEventListener("click",importWizard);
 $("#exportBtn").addEventListener("click",exportMenu);
 $("#outlookBtn").addEventListener("click",outlookMenu);
-$("#connectBtn").addEventListener("click",async()=>{
-  if(authUser){ if(confirm("Abmelden?")) doLogout(); return; }
-  if(!fileHandle && localStorage.getItem("crm-data") && (db&&(db.contacts.length||db.companies.length||db.deals.length))){
-    if(confirm("Bestehende Datei in OneDrive laden?\n\nOK = vorhandene Datei öffnen\nAbbrechen = neue Datei anlegen (aktuelle Daten übernehmen)"))
-      return connectFile(true);
-    return connectFile(false);
-  }
-  connectFile(fileHandle?false:confirm("Bestehende CRM-Datei öffnen? (Abbrechen = neue Datei anlegen)"));
-});
+$("#connectBtn").addEventListener("click",storageMenu);
+$("#localResumeBtn").addEventListener("click",resumeDir);
+$("#localOpenBtn").addEventListener("click",connectDir);
+$("#cloudShow").addEventListener("click",()=>{showLogin();setAuthMode("login");});
+$("#localShow").addEventListener("click",()=>showLocal(pendingDir));
 $("#loginBtn").addEventListener("click",doAuth);
 $("#loginToggle").addEventListener("click",()=>setAuthMode(authMode==="signup"?"login":"signup"));
 $("#loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")doAuth();});
@@ -1797,10 +1979,17 @@ try{const bl=document.querySelector('.brandlogo'); if(bl)document.querySelector(
 applyStaticLang();
 reconnectProspects();
 (async()=>{
+  /* Lokaler Modus hat Vorrang: gemerkten OneDrive-Ordner direkt öffnen (Chrome fragt ggf. einmal nach Erlaubnis) */
+  let h=null;try{h=hasFS&&await idbGet("dataDir");}catch(e){}
+  if(h){
+    try{if((await h.queryPermission({mode:"readwrite"}))==="granted"){await useDir(h,false);return;}}
+    catch(e){return showLocal(null,"„"+h.name+"“ konnte nicht geöffnet werden — bitte neu auswählen.");}
+    return showLocal(h);
+  }
+  /* Noch angemeldet in der alten Cloud? Dann dort weiter (zum Übertragen in den OneDrive-Ordner) */
   const app=sbInit();
-  if(!app){showLogin("Login-Bibliothek nicht geladen (Internet nötig).");setAuthMode("login");return;}
-  try{const {data}=await app.auth.getSession(); if(data&&data.session){await onAuth();return;}}catch(e){}
-  showLogin(); setAuthMode("login");
+  if(app){try{const {data}=await app.auth.getSession(); if(data&&data.session){await onAuth();return;}}catch(e){}}
+  showLocal(null);
 })();
 </script>
 </body>
