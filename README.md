@@ -20,3 +20,13 @@ Beim nächsten Start reicht ein Klick auf „Weiter mit CRM-Daten“ (Chrome fra
 **Backup:** „Export“ → „Vollständiges Backup (JSON)“ enthält alle Projekte; einspielen über „OneDrive-Ordner…“ → „JSON-Backup einlesen“.
 
 **Hinweis Outlook-Import:** Der Microsoft-Login funktioniert nicht, wenn `index.html` direkt geöffnet wird (`file://`). Dafür die App über die Web-Adresse oder `http://localhost` öffnen — die Daten bleiben trotzdem im OneDrive-Ordner.
+
+## Aufgaben (Projektmanagement) — `aufgaben/aufgaben.html`
+
+Lokale Version des Projekte-Moduls der Mandrudi-Plattform: Projekte, Aufgaben (Offen → In Arbeit → Erledigt), Zuständige, Fälligkeiten, Checklisten, Kommentare. Die **Übersicht** zeigt alle offenen Aufgaben nach *Überfällig / Heute / Nächste 7 Tage / Später* und markiert Aufgaben, die seit 7+ Tagen nicht angefasst wurden („liegt seit … Tagen“). Der Tab-Titel zeigt die Zahl der überfälligen + heute fälligen Aufgaben; auf Wunsch kommt einmal täglich eine Erinnerung.
+
+**Einrichten:** Im Mandrudi-OneDrive einen Ordner `Aufgaben` anlegen, `aufgaben.html` hineinlegen, in Chrome/Edge öffnen und als Datenordner denselben Ordner `Aufgaben` wählen. Weitere Macs wählen denselben Ordner. Synchronisation wie beim CRM (jeder Mac schreibt nur seine `aufgaben-<id>.json`).
+
+**DokuApp → Claude → Aufgaben:** Claude legt die To-dos aus den Aufnahmen als Markdown-Datei in `Aufgaben/Eingang` ab. Jede Zeile `- [ ] Aufgabe | fällig: JJJJ-MM-TT | zuständig: Name` wird automatisch eine Aufgabe (Projekt aus der Zeile `Projekt: …`), die Datei wandert nach `Eingang/verarbeitet` und bleibt als Quelle an der Aufgabe verlinkt. Die genaue Anleitung für Claude steht in der App unter „OneDrive-Ordner…“ → „Anleitung für Claude anzeigen“.
+
+**Übernahme aus der Plattform (einmalig):** „OneDrive-Ordner…“ → „Aus der Mandrudi-Plattform übernehmen“ → mit dem Plattform-Login anmelden. In der Plattform wird nichts gelöscht; mehrfaches Übernehmen erzeugt keine Doppelten.

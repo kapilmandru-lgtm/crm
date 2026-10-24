@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgaben</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --panel:#ffffff; --ink:#1f2733; --muted:#6b7688;
+    --line:#e4e8f0; --brand:#2f6bff; --brand-d:#1f4fd6;
+    --green:#1eae6b; --amber:#e6a417; --red:#e0483d;
+    --shadow:0 1px 3px rgba(18,28,45,.08),0 8px 24px rgba(18,28,45,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+  button{font-family:inherit;font-size:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit;font-size:14px}
+  .hide{display:none!important}
+
+  /* Layout */
+  .app{display:flex;min-height:100vh}
+  .side{width:232px;flex-shrink:0;background:#0f1626;color:#c7d0e0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{padding:18px 18px 14px;font-weight:800;font-size:17px;color:#fff;letter-spacing:.2px}
+  .brand span{color:#8fb0ff;font-weight:600}
+  .nav a,.plist a{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:0 10px 2px;border-radius:9px;color:#c7d0e0;cursor:pointer;text-decoration:none;font-weight:500}
+  .nav a:hover,.plist a:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav a.active,.plist a.active{background:var(--brand);color:#fff}
+  .nav .ic,.plist .ic{width:18px;text-align:center}
+  .txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .badge{margin-left:auto;background:rgba(255,255,255,.14);border-radius:20px;padding:1px 8px;font-size:11px;font-weight:700}
+  .badge.red{background:var(--red);color:#fff}
+  .plabel{display:flex;align-items:center;justify-content:space-between;padding:16px 22px 6px;font-size:10px;letter-spacing:.6px;color:#7c8aa5;font-weight:700}
+  .plabel button{background:var(--brand);color:#fff;border:none;border-radius:7px;width:24px;height:24px;font-size:16px;line-height:1}
+  .plist{flex:1;overflow:auto}
+  .sfoot{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+  .st{display:flex;align-items:center;gap:7px;font-size:12px;margin:2px 2px 8px}
+  .st .dot{width:8px;height:8px;border-radius:50%;background:#7c8aa5;flex-shrink:0}
+  .st.ok .dot{background:var(--green)}
+  .sbtn{display:block;width:100%;background:rgba(255,255,255,.08);color:#e6ebf5;border:none;border-radius:8px;padding:7px;font-weight:600;font-size:12.5px;margin-top:6px}
+  .sbtn:hover{background:rgba(255,255,255,.14)}
+  .main{flex:1;min-width:0}
+  .top{display:flex;align-items:center;gap:12px;padding:18px 26px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .top h1{margin:0;font-size:21px}
+  .top .sub{color:var(--muted);font-size:13px}
+  .grow{flex:1}
+  .search{padding:9px 12px;border:1px solid var(--line);border-radius:9px;min-width:200px}
+  .search:focus{outline:none;border-color:var(--brand)}
+  .btn{background:var(--brand);color:#fff;border:none;border-radius:9px;padding:9px 15px;font-weight:600}
+  .btn:hover{background:var(--brand-d)}
+  .btn.sec{background:#eef1f7;color:var(--ink)}
+  .btn.sec:hover{background:#e3e8f1}
+  .btn.danger{background:#fdeceb;color:var(--red)}
+  .btn.sm{padding:5px 10px;font-size:12.5px}
+  .btn.block{display:block;width:100%}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .content{padding:22px 26px}
+  .link{color:var(--brand);cursor:pointer;font-weight:600;text-decoration:none}
+  .muted{color:var(--muted)}
+
+  /* Übersicht */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .stat{background:var(--panel);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .l{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase}
+  .stat .n{font-size:28px;font-weight:800;margin-top:4px}
+  .stat.red .n{color:var(--red)} .stat.amber .n{color:#c88a00} .stat.green .n{color:var(--green)}
+  .group{background:var(--panel);border-radius:14px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .group h3{margin:0;padding:12px 16px;font-size:14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+  .group.red h3{color:var(--red)}
+  .cnt{background:#eef1f7;border-radius:20px;padding:0 8px;font-size:12px;color:var(--muted);font-weight:700}
+  .trow{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line)}
+  .trow:last-child{border-bottom:none}
+  .trow:hover{background:#f7f9fc}
+  .trow input[type=checkbox]{width:18px;height:18px;accent-color:var(--green);flex-shrink:0;cursor:pointer}
+  .tmain{flex:1;min-width:0;cursor:pointer}
+  .tt{font-weight:600}
+  .tm{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+  .chip{display:inline-block;border-radius:6px;padding:0 6px;background:#eef1f7;color:#42506a;font-size:11.5px;font-weight:600}
+  .chip.warn{background:#fdf3dc;color:#a86d00}
+  .tdue{font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap}
+  .tdue.red{color:var(--red)} .tdue.amber{color:#a86d00}
+  .empty{padding:28px;text-align:center;color:var(--muted)}
+
+  /* Board */
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+  .col{background:#e9edf5;border-radius:14px;padding:10px;min-height:140px}
+  .col.over{outline:2px dashed var(--brand)}
+  .colh{display:flex;justify-content:space-between;align-items:center;font-weight:700;padding:4px 6px 10px}
+  .card{background:var(--panel);border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:0 1px 2px rgba(18,28,45,.08);cursor:grab}
+  .card .tt{cursor:pointer}
+  .card.done .tt{text-decoration:line-through;color:var(--muted)}
+  .card .acts{display:flex;gap:6px;margin-top:8px}
+  .qadd{width:100%;padding:8px 10px;border:1px dashed #b9c3d6;border-radius:9px;background:rgba(255,255,255,.6);margin-bottom:8px}
+  .qadd:focus{outline:none;border-color:var(--brand);background:#fff}
+
+  /* Modal */
+  .ov{position:fixed;inset:0;background:rgba(15,22,38,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:100;overflow:auto}
+  .ov.show{display:flex}
+  .modal{background:var(--panel);border-radius:16px;width:100%;max-width:620px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .mh{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .mh h3{margin:0;font-size:17px}
+  .mh .x{margin-left:auto;background:none;border:none;font-size:22px;color:var(--muted);line-height:1}
+  .mb{padding:18px 20px}
+  .mf{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .fld{margin-bottom:12px}
+  .fld label{display:block;font-weight:600;font-size:12.5px;margin-bottom:5px;color:#42506a}
+  .fld input,.fld select,.fld textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#fff}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--brand)}
+  .fld textarea{min-height:70px;resize:vertical}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .quick{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+  .quick button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:2px 8px;font-size:12px}
+  .msec{margin-top:16px}
+  .msec h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  .cl{display:flex;align-items:center;gap:8px;padding:3px 0}
+  .cl span{flex:1}
+  .cl.done span{text-decoration:line-through;color:var(--muted)}
+  .addrow{display:flex;gap:8px;margin-top:6px;align-items:flex-start}
+  .addrow input,.addrow textarea{flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:9px}
+  .cm{background:#f7f9fc;border-radius:9px;padding:8px 10px;margin-bottom:6px;white-space:pre-wrap}
+  .cm .meta{font-size:11.5px;color:var(--muted)}
+  pre.copy{background:#f4f6fb;border:1px solid var(--line);border-radius:9px;padding:12px;white-space:pre-wrap;font-size:12.5px;max-height:340px;overflow:auto;margin:0}
+  .kv{display:flex;padding:6px 0;border-bottom:1px solid var(--line)}
+  .kv .k{width:130px;color:var(--muted);font-size:13px}
+  .kv .v{flex:1;font-weight:500}
+  .stack .btn+.btn{margin-top:8px}
+  .err{color:var(--red);font-weight:600;min-height:18px;font-size:13px}
+
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#0f1626;color:#fff;
+    padding:11px 20px;border-radius:10px;font-weight:600;box-shadow:var(--shadow);z-index:200;opacity:0;transition:.25s;pointer-events:none}
+  .toast.show{opacity:1}
+
+  /* Start */
+  .startov{position:fixed;inset:0;z-index:500;background:#0f1626;display:flex;align-items:center;justify-content:center;padding:20px}
+  .startcard{background:#fff;border-radius:18px;padding:34px 30px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center}
+  .startcard h2{margin:0 0 6px;font-size:22px}
+  .startcard p{margin:0 0 14px;font-size:13px;color:var(--muted)}
+  .startcard .btn{padding:12px;font-size:15px}
+  .startcard .btn+.btn{margin-top:10px}
+
+  @media(max-width:860px){.side{width:72px}.brand span,.txt,.plabel span,.st .lbl{display:none}
+    .stats{grid-template-columns:1fr 1fr}.board{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="startOv" class="startov hide">
+  <div class="startcard">
+    <h2>Aufgaben</h2>
+    <p>Projekte &amp; Aufgaben lokal im Mandrudi-OneDrive — alle Macs wählen denselben Ordner (z. B. „Aufgaben“).</p>
+    <p class="err" id="startMsg"></p>
+    <button class="btn block hide" id="resumeBtn"></button>
+    <button class="btn block" id="openBtn">📂 OneDrive-Ordner wählen</button>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">mandrudi <span>Aufgaben</span></div>
+    <nav class="nav"><a id="navFocus" onclick="go('focus')"><span class="ic">◎</span><span class="txt">Übersicht</span><span class="badge" id="bFocus"></span></a></nav>
+    <div class="plabel"><span>PROJEKTE</span><button title="Neues Projekt" onclick="addProject()">+</button></div>
+    <div class="plist" id="plist"></div>
+    <div class="sfoot">
+      <div class="st" id="stBox"><span class="dot"></span><span class="lbl" id="stLbl">Nicht verbunden</span></div>
+      <button class="sbtn" id="remindBtn" onclick="toggleRemind()">🔔 Erinnerungen</button>
+      <button class="sbtn" onclick="folderMenu()">OneDrive-Ordner…</button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="top">
+      <div><h1 id="vTitle">Übersicht</h1><div class="sub" id="vSub"></div></div>
+      <div id="vActs"></div>
+      <span class="grow"></span>
+      <input class="search" id="search" placeholder="Suchen…" autocomplete="off">
+      <button class="btn" onclick="newTask()">+ Aufgabe</button>
+    </header>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================ Grundlagen ============================ */
+const STATUSES=[{id:"todo",label:"Offen"},{id:"doing",label:"In Arbeit"},{id:"done",label:"Erledigt"}];
+const STALE_DAYS=7;                 // so lange ohne Bewegung → „liegt seit … Tagen“
+const INBOX="Eingang", DONE_DIR="verarbeitet";
+let INBOX_MIN_AGE=10000;            // Eingangs-Datei erst übernehmen, wenn sie 10 s unverändert ist (Claude/OneDrive schreibt evtl. noch)
+const PLAT_URL="https://eyrvsrwfpmbrkngazruk.supabase.co", PLAT_KEY="sb_publishable_j9h88OEWC7rwiFzvcJw6Yw_WwAE6zJj";
+
+const uid=()=>(crypto&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,9));
+const $=s=>document.querySelector(s);
+const esc=s=>(s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200);}
+/* Stabile IDs für Einträge aus dem Eingang: zwei Macs, die dieselbe Datei lesen, erzeugen dieselbe Aufgabe */
+function hash(s){let a=0x811c9dc5,b=0x5bd1e995;
+  for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,16777619);b=Math.imul(b^c,2246822507);}
+  return (a>>>0).toString(16).padStart(8,"0")+(b>>>0).toString(16).padStart(8,"0");}
+
+/* Datum (immer lokale Zeit, nicht UTC) */
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const todayStr=()=>ymd(new Date());
+function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return ymd(d);}
+const dayDiff=s=>Math.round((new Date(s+"T12:00:00")-new Date(todayStr()+"T12:00:00"))/864e5);
+function dueLabel(s){if(!s)return "";const n=dayDiff(s);
+  if(n===0)return "heute";if(n===1)return "morgen";if(n===-1)return "gestern";if(n<0)return "vor "+(-n)+" Tagen";
+  const d=new Date(s+"T12:00:00");return d.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"})+(n>300?"."+d.getFullYear():"");}
+const fmtTs=ms=>ms?new Date(ms).toLocaleString("de-DE",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}):"";
+function parseDate(v){let m;v=(v||"").trim();
+  if((m=v.match(/(\d{4})-(\d{1,2})-(\d{1,2})/)))return m[1]+"-"+pad(m[2])+"-"+pad(m[3]);
+  if((m=v.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})?/))){const y=m[3]?(m[3].length===2?"20"+m[3]:m[3]):String(new Date().getFullYear());return y+"-"+pad(m[2])+"-"+pad(m[1]);}
+  if(/^heute$/i.test(v))return addDays(0);if(/^morgen$/i.test(v))return addDays(1);if(/^übermorgen$/i.test(v))return addDays(2);
+  return "";}
+
+/* ============================ Daten ============================ */
+let data={projects:[],tasks:[]};
+let state={view:"focus",q:""};
+function loadCache(){try{const d=JSON.parse(lsGet("aufg-data"));if(d&&Array.isArray(d.projects)&&Array.isArray(d.tasks))data=d;}catch(e){}}
+const projById=id=>data.projects.find(p=>p.id===id);
+const archivedIds=()=>new Set(data.projects.filter(p=>p.archived).map(p=>p.id));
+function match(t){const q=state.q.trim().toLowerCase();if(!q)return true;const p=projById(t.projectId);
+  return [t.title,t.description,t.assignee,p&&p.name].some(x=>(x||"").toLowerCase().includes(q));}
+function liveOpen(filtered=true){const arch=archivedIds();return data.tasks.filter(t=>t.status!=="done"&&!arch.has(t.projectId)&&(!filtered||match(t)));}
+function staleDays(t){if(t.status==="done")return 0;const d=Math.floor((Date.now()-(t.updatedAt||t.createdAt||Date.now()))/864e5);return d>=STALE_DAYS?d:0;}
+function counts(){const o=liveOpen(false);return {over:o.filter(t=>t.due&&dayDiff(t.due)<0).length,today:o.filter(t=>t.due&&dayDiff(t.due)===0).length};}
+/* Projekt per Name finden oder anlegen (stabile ID, damit zwei Macs dasselbe Projekt erzeugen) */
+function ensureProject(name){const n=(name||"").trim()||"Eingang";
+  let p=data.projects.find(x=>!x.archived&&x.name.toLowerCase()===n.toLowerCase());if(p)return p;
+  const id="p-"+hash("projekt:"+n.toLowerCase());p=data.projects.find(x=>x.id===id);
+  if(p){p.archived=false;return p;}
+  p={id,name:n,createdAt:Date.now()};data.projects.push(p);return p;}
+
+/* ============================ Speichern / Abgleich über OneDrive =====
+   Jeder Mac schreibt nur seine eigene Datei (aufgaben-<id>.json) in den gemeinsamen Ordner und liest die der
+   anderen. So bekommt OneDrive nie zwei Schreiber auf dieselbe Datei. Pro Projekt/Aufgabe gewinnt die neueste
+   Änderung; Löschungen werden mit Zeitstempel mitgeführt, damit sie nicht von einem anderen Mac zurückkommen. */
+const hasFS=!!window.showDirectoryPicker;
+const DEV_RX=/^aufgaben-.+\.json$/; // eigener Name, damit sich CRM und Aufgaben nie in die Quere kommen, selbst im selben Ordner
+const deviceId=(()=>{let d=lsGet("aufg-device");if(!d){d=uid().replace(/-/g,"").slice(0,12);lsSet("aufg-device",d);}return d;})();
+const ownFile="aufgaben-"+deviceId+".json";
+let dataDir=null, pendingDir=null, dirReady=false, dirBusy=false, dirAgain=false, ownStale=false, saveTimer=null;
+let known=new Map();   // Schlüssel → {t, r: Datensatz} bzw. {t, d:1} (gelöscht) — Stand über alle Macs
+let view=new Map();    // Schlüssel → Datensatz (kanonisch) beim letzten Abgleich — Basis für eigene Änderungen
+let seenFiles={};      // Dateiname → lastModified der zuletzt gelesenen Fassung
+const canon=v=>JSON.stringify(v,(k,x)=>x&&typeof x==="object"&&!Array.isArray(x)?Object.keys(x).sort().reduce((o,k2)=>(o[k2]=x[k2],o),{}):x);
+function flatten(d){const m=new Map();
+  for(const p of d.projects)m.set("p/"+p.id,p);
+  for(const t of d.tasks){if(!t.id)t.id=uid();m.set("t/"+t.id,t);}
+  return m;}
+const viewOf=d=>new Map([...flatten(d)].map(([k,r])=>[k,canon(r)]));
+function rebuild(){const projects=[],tasks=[];
+  for(const [k,e] of known){if(e.d)continue;if(k.startsWith("p/"))projects.push(e.r);else if(k.startsWith("t/"))tasks.push(e.r);}
+  data={projects,tasks};view=viewOf(data);}
+/* Eigene Änderungen seit dem letzten Abgleich mit Zeitstempel versehen; true, wenn es welche gab */
+function stampLocal(){
+  const cur=flatten(data), now=Date.now(); let n=0;
+  const tick=k=>Math.max(now,((known.get(k)||{}).t||0)+1); // auch bei leicht falsch gehender Mac-Uhr gewinnt die eigene neue Änderung
+  for(const [k,r] of cur){const c=canon(r);if(view.get(k)!==c){known.set(k,{t:tick(k),r});view.set(k,c);n++;}}
+  for(const k of [...view.keys()])if(!cur.has(k)){known.set(k,{t:tick(k),d:1});view.delete(k);n++;}
+  return n>0;}
+/* Einträge eines anderen Macs übernehmen, wo sie neuer sind; true, wenn sich dadurch etwas geändert hat */
+function absorb(entries){let n=0;
+  for(const k in entries){const e=entries[k],m=known.get(k);
+    if(!m||e.t>m.t||(e.t===m.t&&canon(e)>canon(m))){known.set(k,e);n++;}}
+  return n>0;}
+async function readDevices(dir,skipOwn){let changed=false;
+  for await(const [name,h] of dir.entries()){
+    if(h.kind!=="file"||!DEV_RX.test(name)||(skipOwn&&name===ownFile))continue;
+    const f=await h.getFile();if(seenFiles[name]===f.lastModified)continue;
+    try{if(absorb(JSON.parse(await f.text()).entries||{}))changed=true;seenFiles[name]=f.lastModified;}
+    catch(e){} // Datei wird gerade von OneDrive geladen → beim nächsten Abgleich
+  }
+  return changed;}
+async function writeOwn(){
+  const h=await dataDir.getFileHandle(ownFile,{create:true}), w=await h.createWritable();
+  await w.write(JSON.stringify({v:1,app:"aufgaben",device:deviceId,savedAt:Date.now(),entries:Object.fromEntries(known)}));await w.close();}
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{saveTimer=null;save();},400);}
+function save(){lsSet("aufg-data",JSON.stringify(data));if(dataDir&&dirReady)return syncDir();}
+async function syncDir(){
+  if(!dataDir||!dirReady)return;
+  if(dirBusy){dirAgain=true;return;}
+  dirBusy=true;
+  try{
+    let mine=stampLocal(), changed=false;
+    if(await readDevices(dataDir,true)){mine=stampLocal()||mine;rebuild();changed=true;}
+    const imported=await scanInbox();
+    if(imported){mine=stampLocal()||mine;changed=true;toast(imported+" neue Aufgabe(n) aus dem Eingang");}
+    else if(changed)toast("Aktualisiert (Änderung von einem anderen Mac)");
+    if(mine||ownStale){await writeOwn();ownStale=false;}
+    lsSet("aufg-data",JSON.stringify(data));
+    if(changed)renderAll();
+    setStatus(true);remindCheck();
+  }catch(e){console.warn(e);setStatus(false,"OneDrive-Ordner nicht erreichbar");}
+  dirBusy=false;
+  if(dirAgain){dirAgain=false;syncDir();}
+}
+/* Änderungen der anderen Macs und neue Eingangs-Dateien: alle 15 s und beim Zurückkehren ins Fenster */
+function dirCheck(){if(!document.hidden&&!saveTimer)syncDir();}
+setInterval(dirCheck,15000);
+window.addEventListener("focus",dirCheck);
+document.addEventListener("visibilitychange",dirCheck);
+window.addEventListener("pagehide",()=>{if(saveTimer){clearTimeout(saveTimer);saveTimer=null;save();}});
+function setStatus(ok,label){$("#stBox").classList.toggle("ok",!!ok);
+  $("#stLbl").textContent=ok&&dataDir?"OneDrive · "+dataDir.name:(label||"Nicht verbunden");}
+
+/* IndexedDB nur, um den gewählten Ordner zwischen den Starts zu merken */
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open("aufgaben-store",1);
+  r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function idbSet(k,v){const d=await idb();return new Promise(r=>{const t=d.transaction("kv","readwrite");t.objectStore("kv").put(v,k);t.oncomplete=r;});}
+async function idbGet(k){const d=await idb();return new Promise(r=>{const t=d.transaction("kv","readonly");const q=t.objectStore("kv").get(k);q.onsuccess=()=>r(q.result);});}
+
+/* Ordner als Datenquelle übernehmen. Leerer Ordner → aktueller Stand wird hineingeschrieben. */
+async function useDir(h){
+  known=new Map();view=new Map();seenFiles={};
+  await readDevices(h,false);
+  if(known.size)rebuild(); // sonst: view leer → beim Abgleich wird der aktuelle Stand als eigene Änderung geschrieben
+  dataDir=h;dirReady=true;
+  try{await h.getDirectoryHandle(INBOX,{create:true});}catch(e){}
+  try{await idbSet("dataDir",h);}catch(e){}
+  $("#startOv").classList.add("hide");renderAll();
+  await syncDir();
+}
+async function connectDir(){
+  if(!hasFS){alert("Der OneDrive-Ordner braucht Chrome oder Edge — Safari kann Dateien nicht direkt speichern.");return;}
+  try{const h=await window.showDirectoryPicker({id:"aufgaben-daten",mode:"readwrite"});
+    await useDir(h);toast("OneDrive-Ordner „"+h.name+"“ verbunden");}
+  catch(e){if(e.name!=="AbortError")alert("Fehler: "+e.message);}
+}
+function showStart(h,msg){
+  pendingDir=h||null;$("#startOv").classList.remove("hide");
+  const r=$("#resumeBtn");r.classList.toggle("hide",!h);$("#openBtn").classList.toggle("sec",!!h);
+  if(h)r.textContent="▶ Weiter mit „"+h.name+"“";
+  $("#startMsg").textContent=msg||(hasFS?"":"Bitte in Chrome oder Edge öffnen — Safari kann Dateien nicht direkt speichern.");
+  $("#openBtn").disabled=!hasFS;
+}
+async function resumeDir(){
+  const h=pendingDir;if(!h)return;
+  try{if((await h.requestPermission({mode:"readwrite"}))!=="granted")return;await useDir(h);}
+  catch(e){showStart(null,"„"+h.name+"“ konnte nicht geöffnet werden — bitte neu auswählen.");}
+}
+
+/* ============================ Eingang: To-dos aus Claude (DokuApp-Aufnahmen) ============================
+   Claude legt pro Aufnahme eine Markdown-Datei in <Ordner>/Eingang ab. Jede Zeile „- [ ] …“ wird eine Aufgabe;
+   optional mit „| fällig: JJJJ-MM-TT | zuständig: Name | projekt: X“. Danach wandert die Datei nach Eingang/verarbeitet. */
+function parseTodo(s){
+  const parts=s.split("|").map(x=>x.trim()), t={title:parts[0],due:"",assignee:"",project:"",note:""};
+  for(const p of parts.slice(1)){const m=p.match(/^([^:]+):\s*(.+)$/);
+    const k=m?m[1].trim().toLowerCase():"", v=m?m[2].trim():"";
+    if(/^(fällig|faellig|bis|deadline|termin|datum)$/.test(k))t.due=parseDate(v);
+    else if(/^(zuständig|zustaendig|wer|verantwortlich|owner)$/.test(k))t.assignee=v;
+    else if(k==="projekt")t.project=v;
+    else t.note+=(t.note?" · ":"")+p;}
+  return t;}
+function parseInbox(fileName,txt){
+  let heading="",project="";const todos=[];
+  for(const l of txt.split(/\r?\n/)){let m;
+    if(!heading&&(m=l.match(/^#\s+(.+)/)))heading=m[1].trim();
+    else if(!project&&(m=l.match(/^\s*\**projekt\**\s*:\s*(.+)$/i)))project=m[1].replace(/\*+/g,"").trim();
+    else if((m=l.match(/^\s*[-*]\s*\[\s?\]\s+(.+)$/)))todos.push(parseTodo(m[1]));}
+  return {heading:heading||fileName.replace(/\.[^.]+$/,""),project,todos};}
+function importText(fileName,txt,sourcePath){
+  const info=parseInbox(fileName,txt);let n=0;
+  for(const td of info.todos){if(!td.title)continue;
+    const id="in-"+hash(fileName+"\n"+td.title);
+    if(known.has("t/"+id)||data.tasks.some(t=>t.id===id))continue; // schon übernommen (oder bewusst gelöscht)
+    const p=ensureProject(td.project||info.project||"Eingang"), now=Date.now();
+    data.tasks.push({id,projectId:p.id,title:td.title,description:(td.note?td.note+"\n\n":"")+"Aus: "+info.heading,
+      status:"todo",assignee:td.assignee,due:td.due,createdAt:now,updatedAt:now,checklist:[],comments:[],
+      source:sourcePath?{path:sourcePath,name:fileName}:null});
+    n++;}
+  return n;}
+async function scanInbox(){
+  if(!dataDir)return 0;
+  let inbox;try{inbox=await dataDir.getDirectoryHandle(INBOX,{create:true});}catch(e){return 0;}
+  let n=0;
+  for await(const [name,h] of inbox.entries()){
+    if(h.kind!=="file"||!/\.(md|markdown|txt)$/i.test(name))continue;
+    let f;try{f=await h.getFile();}catch(e){continue;}
+    if(Date.now()-f.lastModified<INBOX_MIN_AGE)continue;
+    const txt=await f.text();
+    try{const dst=await inbox.getDirectoryHandle(DONE_DIR,{create:true});
+      let target=name;try{await dst.getFileHandle(target);target=todayStr()+" "+Date.now().toString(36)+" "+name;}catch(e){}
+      n+=importText(name,txt,INBOX+"/"+DONE_DIR+"/"+target);
+      const w=await (await dst.getFileHandle(target,{create:true})).createWritable();await w.write(txt);await w.close();
+      await inbox.removeEntry(name);
+    }catch(e){console.warn(e);} // z. B. hat ein anderer Mac die Datei schon verschoben — Aufgaben sind über die stabilen IDs trotzdem nur einmal da
+  }
+  return n;}
+async function openSource(){
+  const d=draft;if(!d||!d.source||!dataDir)return;
+  try{const parts=d.source.path.split("/");let cur=dataDir;for(const p of parts.slice(0,-1))cur=await cur.getDirectoryHandle(p);
+    const f=await (await cur.getFileHandle(parts[parts.length-1])).getFile();
+    const url=URL.createObjectURL(new Blob([await f.text()],{type:"text/plain;charset=utf-8"}));
+    if(!window.open(url,"_blank")){const a=document.createElement("a");a.href=url;a.download=f.name;a.click();}
+    setTimeout(()=>URL.revokeObjectURL(url),60000);}
+  catch(e){alert("Datei nicht gefunden:\n"+d.source.path);}
+}
+function claudeText(){const dir=dataDir?dataDir.name:"Aufgaben";
+  return `Wenn ich dir eine Aufnahme oder ein Transkript aus der Doku App gebe:
+1. Fasse die wichtigsten Take-aways zusammen.
+2. Liste alle To-dos auf.
+3. Speichere das Ergebnis als Markdown-Datei im Ordner „${dir}/Eingang“ in meinem Mandrudi-OneDrive.
+   Dateiname: JJJJ-MM-TT Thema.md — und zwar genau in diesem Format:
+
+# <Thema der Aufnahme> – <Datum>
+Projekt: <Projektname>
+
+## Take-aways
+- …
+
+## To-dos
+- [ ] <Aufgabe> | fällig: JJJJ-MM-TT | zuständig: <Name>
+- [ ] <Aufgabe>
+
+Regeln:
+- Jede Aufgabe steht in genau einer Zeile, die mit „- [ ] “ beginnt.
+- „fällig“ nur angeben, wenn ein Termin genannt wurde oder sich klar ableiten lässt — immer als JJJJ-MM-TT.
+- „zuständig“ nur, wenn klar ist, wer es macht.
+- Die Zeile „Projekt:“ weglassen, wenn das Projekt unklar ist (dann landen die Aufgaben im Projekt „Eingang“).`;}
+
+/* ============================ Übernahme aus der Mandrudi-Plattform (einmalig) ============================ */
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;
+  s.onerror=()=>rej(new Error("Bibliothek konnte nicht geladen werden (Internet?)"));document.head.appendChild(s);});}
+async function platformImport(email,pass){
+  if(!window.supabase)await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js");
+  const sbc=window.supabase.createClient(PLAT_URL,PLAT_KEY,{auth:{persistSession:false}});
+  const {error}=await sbc.auth.signInWithPassword({email,password:pass});if(error)throw error;
+  const all=async t=>{const out=[];for(let f=0;;f+=1000){const r=await sbc.from(t).select("*").range(f,f+999);
+    if(r.error)throw r.error;out.push(...(r.data||[]));if(!r.data||r.data.length<1000)break;}return out;};
+  const [projs,tasks,cl,cm]=await Promise.all([all("pm_projects"),all("pm_tasks"),all("pm_checklist_items"),all("pm_comments")]);
+  let profs=[],docs=[];
+  try{profs=await all("profiles");}catch(e){}
+  try{const r=await sbc.from("pm_task_documents").select("task_id,documents(name)");if(!r.error)docs=r.data||[];}catch(e){}
+  try{await sbc.auth.signOut();}catch(e){}
+  const who=id=>{const p=profs.find(x=>x.id===id);return p?(p.display_name||""):"";};
+  const ts=s=>Date.parse(s)||Date.now(), have=k=>known.has(k);
+  let np=0,nt=0;
+  for(const p of projs){if(have("p/"+p.id)||projById(p.id))continue;
+    data.projects.push({id:p.id,name:p.name,createdAt:ts(p.created_at),archived:!!p.archived});np++;}
+  for(const t of tasks){if(have("t/"+t.id)||data.tasks.some(x=>x.id===t.id))continue;
+    const pid=t.project_id&&(projById(t.project_id)||have("p/"+t.project_id))?t.project_id:ensureProject("Eingang").id;
+    data.tasks.push({id:t.id,projectId:pid,title:t.title,description:t.description||"",status:t.status||"todo",
+      assignee:who(t.assignee),due:t.due_date||"",createdAt:ts(t.created_at),updatedAt:Date.now(),doneAt:t.status==="done"?Date.now():0,
+      checklist:cl.filter(c=>c.task_id===t.id).sort((a,b)=>(a.position-b.position)||String(a.created_at).localeCompare(String(b.created_at)))
+        .map(c=>({id:c.id,text:c.text,done:!!c.done})),
+      comments:cm.filter(c=>c.task_id===t.id).sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at)))
+        .map(c=>({id:c.id,author:who(c.author),text:c.body,at:ts(c.created_at)})),
+      attachments:docs.filter(d=>d.task_id===t.id).map(d=>(d.documents&&d.documents.name)||"Dokument")});
+    nt++;}
+  save();return {np,nt};
+}
+
+/* ============================ Erinnerungen ============================ */
+function remindLabel(){const b=$("#remindBtn");if(!b)return;
+  b.textContent=("Notification" in window)&&Notification.permission==="granted"?"🔔 Erinnerungen an":"🔕 Erinnerungen einschalten";}
+async function toggleRemind(){
+  if(!("Notification" in window)){toast("Dieser Browser kann keine Erinnerungen anzeigen");return;}
+  if(Notification.permission==="granted"){toast("Erinnerungen sind an — ausschalten in den Chrome-Einstellungen");return;}
+  try{await Notification.requestPermission();}catch(e){}
+  remindLabel();if(Notification.permission==="granted"){lsSet("aufg-reminded","");remindCheck();}
+}
+/* Einmal pro Tag (und Mac): „3 überfällig · 2 heute fällig“ */
+function remindCheck(){
+  if(!("Notification" in window)||Notification.permission!=="granted"||lsGet("aufg-reminded")===todayStr())return;
+  const c=counts();if(!c.over&&!c.today)return;
+  try{new Notification("Aufgaben",{body:(c.over?c.over+" überfällig":"")+(c.over&&c.today?" · ":"")+(c.today?c.today+" heute fällig":"")});
+    lsSet("aufg-reminded",todayStr());}catch(e){}
+}
+setInterval(remindCheck,3600000);
+
+/* ============================ Ansichten ============================ */
+function go(v){state.view=v;renderAll();}
+function updateTitle(){const c=counts(),n=c.over+c.today;document.title=(n?"("+n+") ":"")+"Aufgaben";
+  const b=$("#bFocus");b.textContent=n||"";b.classList.toggle("red",c.over>0);}
+function renderSide(){
+  $("#navFocus").classList.toggle("active",state.view==="focus");
+  const open=data.tasks.filter(t=>t.status!=="done");
+  $("#plist").innerHTML=data.projects.filter(p=>!p.archived).sort((a,b)=>a.name.localeCompare(b.name,"de")).map(p=>{
+    const n=open.filter(t=>t.projectId===p.id).length;
+    return `<a class="${state.view==="p:"+p.id?"active":""}" onclick="go('p:${p.id}')"><span class="ic">▤</span><span class="txt">${esc(p.name)}</span>${n?`<span class="badge">${n}</span>`:""}</a>`;}).join("")
+    ||'<div style="padding:4px 22px;font-size:12px;color:#7c8aa5">Noch keine Projekte</div>';}
+function renderAll(){
+  renderSide();
+  const v=state.view;
+  if(v.startsWith("p:")&&projById(v.slice(2))){const p=projById(v.slice(2));
+    $("#vTitle").textContent=p.name;$("#vSub").textContent="Offen → In Arbeit → Erledigt (Karten ziehen)";
+    $("#vActs").innerHTML=`<button class="btn sm sec" onclick="renameProject('${p.id}')">✎ Umbenennen</button> <button class="btn sm sec" onclick="deleteProject('${p.id}')">🗑 Löschen</button>`;
+    viewProject(p.id);}
+  else{state.view="focus";$("#vTitle").textContent="Übersicht";$("#vSub").textContent="Alle offenen Aufgaben nach Fälligkeit — damit nichts liegen bleibt";
+    $("#vActs").innerHTML="";viewFocus();}
+  updateTitle();remindLabel();
+}
+function taskRow(t){const p=projById(t.projectId),n=t.due?dayDiff(t.due):null,sd=staleDays(t),cl=t.checklist||[];
+  return `<div class="trow"><input type="checkbox" title="Erledigt" ${t.status==="done"?"checked":""} onchange="toggleDone('${t.id}')">
+    <div class="tmain" onclick="openTask('${t.id}')"><div class="tt">${esc(t.title)}</div><div class="tm">
+      ${p?`<span class="chip">${esc(p.name)}</span>`:""}${t.status==="doing"?'<span class="chip">In Arbeit</span>':""}
+      ${t.assignee?`<span>👤 ${esc(t.assignee)}</span>`:""}${cl.length?`<span>☑ ${cl.filter(c=>c.done).length}/${cl.length}</span>`:""}
+      ${t.source?"<span>📄 DokuApp</span>":""}${sd?`<span class="chip warn">liegt seit ${sd} Tagen</span>`:""}</div></div>
+    <div class="tdue ${n!==null&&n<0?"red":n===0?"amber":""}">${esc(dueLabel(t.due))}</div></div>`;}
+function viewFocus(){
+  const open=liveOpen(), g={over:[],today:[],week:[],later:[],none:[]};
+  for(const t of open){if(!t.due){g.none.push(t);continue;}const n=dayDiff(t.due);
+    (n<0?g.over:n===0?g.today:n<=7?g.week:g.later).push(t);}
+  const byDue=(a,b)=>(a.due||"9").localeCompare(b.due||"9")||((a.createdAt||0)-(b.createdAt||0));
+  Object.values(g).forEach(a=>a.sort(byDue));
+  const stale=open.filter(staleDays).length;
+  const grp=(key,title,cls)=>g[key].length?`<div class="group ${cls||""}"><h3>${title}<span class="cnt">${g[key].length}</span></h3>${g[key].map(taskRow).join("")}</div>`:"";
+  $("#content").innerHTML=`
+    <div class="stats">
+      <div class="stat ${g.over.length?"red":""}"><div class="l">Überfällig</div><div class="n">${g.over.length}</div></div>
+      <div class="stat ${g.today.length?"amber":""}"><div class="l">Heute fällig</div><div class="n">${g.today.length}</div></div>
+      <div class="stat"><div class="l">Nächste 7 Tage</div><div class="n">${g.week.length}</div></div>
+      <div class="stat ${stale?"amber":"green"}"><div class="l">Bleibt liegen (${STALE_DAYS}+ Tage)</div><div class="n">${stale}</div></div>
+    </div>
+    ${open.length?grp("over","⚠ Überfällig","red")+grp("today","Heute")+grp("week","Nächste 7 Tage")+grp("later","Später")+grp("none","Ohne Fälligkeit")
+      :`<div class="group"><div class="empty">${state.q?"Keine Treffer.":"Keine offenen Aufgaben 🎉<br><br>Neue Aufgaben über „+ Aufgabe“, im Projekt-Board oder automatisch aus dem Eingang (Claude)."}</div></div>`}`;}
+function cardHtml(t){const n=t.due?dayDiff(t.due):null,sd=staleDays(t),cl=t.checklist||[],i=STATUSES.findIndex(s=>s.id===t.status);
+  return `<div class="card ${t.status==="done"?"done":""}" draggable="true" ondragstart="dragId='${t.id}'">
+    <div class="tt" onclick="openTask('${t.id}')">${esc(t.title)}</div>
+    <div class="tm">${t.due?`<span class="tdue ${t.status!=="done"&&n<0?"red":n===0?"amber":""}">◷ ${esc(dueLabel(t.due))}</span>`:""}
+      ${t.assignee?`<span>👤 ${esc(t.assignee)}</span>`:""}${cl.length?`<span>☑ ${cl.filter(c=>c.done).length}/${cl.length}</span>`:""}
+      ${t.source?"<span>📄</span>":""}${sd?`<span class="chip warn">liegt ${sd} T.</span>`:""}</div>
+    <div class="acts">${i>0?`<button class="btn sm sec" title="zurück" onclick="setTaskStatus('${t.id}','${STATUSES[i-1].id}')">←</button>`:""}
+      ${i<2?`<button class="btn sm sec" title="weiter" onclick="setTaskStatus('${t.id}','${STATUSES[i+1].id}')">→</button>`:""}</div></div>`;}
+let dragId=null;
+function dropOn(ev,status){ev.preventDefault();ev.currentTarget.classList.remove("over");if(dragId)setTaskStatus(dragId,status);dragId=null;}
+function viewProject(pid){
+  const list=data.tasks.filter(t=>t.projectId===pid&&match(t));
+  $("#content").innerHTML=`<div class="board">${STATUSES.map(s=>{
+    const items=list.filter(t=>t.status===s.id).sort(s.id==="done"?(a,b)=>(b.doneAt||0)-(a.doneAt||0):(a,b)=>(a.due||"9").localeCompare(b.due||"9")||((a.createdAt||0)-(b.createdAt||0)));
+    return `<div class="col" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropOn(event,'${s.id}')">
+      <div class="colh"><span>${s.label}</span><span class="cnt">${items.length}</span></div>
+      ${s.id==="todo"?`<input class="qadd" placeholder="+ Aufgabe … | fällig: morgen (Enter)" onkeydown="if(event.key==='Enter')quickAdd(this,'${pid}')">`:""}
+      ${items.map(cardHtml).join("")}</div>`;}).join("")}</div>`;}
+
+/* ============================ Aktionen ============================ */
+function setTaskStatus(id,status){const t=data.tasks.find(x=>x.id===id);if(!t||t.status===status)return;
+  t.status=status;t.updatedAt=Date.now();t.doneAt=status==="done"?Date.now():0;scheduleSave();renderAll();
+  if(status==="done")toast("Erledigt ✓");}
+function toggleDone(id){const t=data.tasks.find(x=>x.id===id);if(t)setTaskStatus(id,t.status==="done"?"todo":"done");}
+function quickAdd(inp,pid){const v=inp.value.trim();if(!v)return;const td=parseTodo(v),now=Date.now();
+  data.tasks.push({id:uid(),projectId:pid,title:td.title,description:td.note,status:"todo",assignee:td.assignee,due:td.due,
+    createdAt:now,updatedAt:now,checklist:[],comments:[]});
+  scheduleSave();renderAll();const q=$(".qadd");if(q)q.focus();}
+function addProject(){const n=prompt("Name des neuen Projekts:");if(!n||!n.trim())return;
+  const p=ensureProject(n);scheduleSave();go("p:"+p.id);}
+function renameProject(id){const p=projById(id);if(!p)return;const n=prompt("Projekt umbenennen:",p.name);
+  if(n&&n.trim()){p.name=n.trim();scheduleSave();renderAll();}}
+function deleteProject(id){const p=projById(id);if(!p)return;const n=data.tasks.filter(t=>t.projectId===id).length;
+  if(!confirm("Projekt „"+p.name+"“ "+(n?"mit "+n+" Aufgabe(n) ":"")+"löschen?"))return;
+  data.tasks=data.tasks.filter(t=>t.projectId!==id);data.projects=data.projects.filter(x=>x.id!==id);
+  scheduleSave();go("focus");toast("Projekt gelöscht");}
+
+/* ---- Aufgaben-Fenster (arbeitet auf einer Kopie; erst „Speichern“ übernimmt) ---- */
+let draft=null;
+const ov=$("#ov"),modal=$("#modal");
+function openModal(html){modal.innerHTML=html;ov.classList.add("show");}
+function closeModal(){ov.classList.remove("show");modal.innerHTML="";draft=null;}
+ov.addEventListener("mousedown",e=>{if(e.target===ov)closeModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&ov.classList.contains("show"))closeModal();});
+function openTask(id){const t=data.tasks.find(x=>x.id===id);if(!t)return;draft=JSON.parse(JSON.stringify(t));renderTaskModal();}
+function newTask(){const pid=state.view.startsWith("p:")?state.view.slice(2):"";
+  draft={id:uid(),projectId:pid||(data.projects.find(p=>!p.archived)||{}).id||"",title:"",description:"",status:"todo",assignee:"",due:"",
+    createdAt:Date.now(),checklist:[],comments:[],_new:true};
+  renderTaskModal();setTimeout(()=>{const t=$("#fTitle");if(t)t.focus();},30);}
+function readForm(){const d=draft;if(!d||!$("#fTitle"))return;
+  d.title=$("#fTitle").value;d.description=$("#fDesc").value;d.projectId=$("#fProj").value;d.status=$("#fStatus").value;
+  d.assignee=$("#fWho").value.trim();d.due=$("#fDue").value;}
+function renderTaskModal(){const d=draft;
+  const projOpts=data.projects.filter(p=>!p.archived||p.id===d.projectId).sort((a,b)=>a.name.localeCompare(b.name,"de"))
+    .map(p=>`<option value="${p.id}" ${p.id===d.projectId?"selected":""}>${esc(p.name)}</option>`).join("");
+  const people=[...new Set(data.tasks.map(t=>t.assignee).filter(Boolean))].sort();
+  const cl=d.checklist||[];
+  openModal(`
+    <div class="mh"><h3>${d._new?"Neue Aufgabe":"Aufgabe"}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="fld"><label>Titel *</label><input id="fTitle" value="${esc(d.title)}"></div>
+      <div class="fld"><label>Beschreibung</label><textarea id="fDesc">${esc(d.description)}</textarea></div>
+      <div class="row2"><div class="fld"><label>Projekt</label><select id="fProj">${projOpts||'<option value="">Eingang (wird angelegt)</option>'}</select></div>
+        <div class="fld"><label>Status</label><select id="fStatus">${STATUSES.map(s=>`<option value="${s.id}" ${s.id===d.status?"selected":""}>${s.label}</option>`).join("")}</select></div></div>
+      <div class="row2"><div class="fld"><label>Zuständig</label><input id="fWho" list="people" value="${esc(d.assignee)}" placeholder="Name">
+          <datalist id="people">${people.map(p=>`<option value="${esc(p)}">`).join("")}</datalist></div>
+        <div class="fld"><label>Fällig am</label><input id="fDue" type="date" value="${esc(d.due)}">
+          <div class="quick"><button type="button" onclick="setDue(0)">Heute</button><button type="button" onclick="setDue(1)">Morgen</button>
+            <button type="button" onclick="setDue(7)">+1 Woche</button><button type="button" onclick="setDue(null)">keins</button></div></div></div>
+      <div class="msec"><h4>Checkliste ${cl.length?`(${cl.filter(c=>c.done).length}/${cl.length})`:""}</h4>
+        ${cl.map((c,i)=>`<div class="cl ${c.done?"done":""}"><input type="checkbox" ${c.done?"checked":""} onchange="clToggle(${i})"><span>${esc(c.text)}</span>
+          <button class="btn sm sec" title="Entfernen" onclick="clDel(${i})">✕</button></div>`).join("")}
+        <div class="addrow"><input id="clNew" placeholder="Neuer Punkt …" onkeydown="if(event.key==='Enter')clAdd()"><button class="btn sm sec" onclick="clAdd()">+</button></div></div>
+      ${d.source?`<div class="msec"><h4>Quelle (DokuApp / Claude)</h4><a class="link" onclick="openSource()">📄 ${esc(d.source.name)}</a></div>`:""}
+      ${(d.attachments||[]).length?`<div class="msec"><h4>Anhänge (aus der Plattform)</h4>${d.attachments.map(a=>`<div class="muted">📄 ${esc(a)}</div>`).join("")}</div>`:""}
+      <div class="msec"><h4>Kommentare</h4>
+        ${(d.comments||[]).map(c=>`<div class="cm"><div class="meta">${esc(c.author||"")}${c.author?" · ":""}${fmtTs(c.at)}</div>${esc(c.text)}</div>`).join("")}
+        <div class="addrow"><textarea id="cmNew" rows="2" placeholder="Kommentar …"></textarea><button class="btn sm sec" onclick="cmAdd()">Hinzufügen</button></div></div>
+    </div>
+    <div class="mf">${d._new?"":`<button class="btn danger" onclick="delTask()">Löschen</button>`}<span class="grow"></span>
+      <button class="btn sec" onclick="closeModal()">Abbrechen</button><button class="btn" onclick="saveTask()">Speichern</button></div>`);}
+function setDue(n){readForm();draft.due=n===null?"":addDays(n);renderTaskModal();}
+function clAdd(){readForm();const v=$("#clNew").value.trim();if(!v)return;draft.checklist.push({id:uid(),text:v,done:false});renderTaskModal();$("#clNew").focus();}
+function clToggle(i){readForm();draft.checklist[i].done=!draft.checklist[i].done;renderTaskModal();}
+function clDel(i){readForm();draft.checklist.splice(i,1);renderTaskModal();}
+function cmAdd(){readForm();const v=$("#cmNew").value.trim();if(!v)return;
+  let me=lsGet("aufg-name");if(!me){me=(prompt("Dein Name für Kommentare:","")||"").trim();if(me)lsSet("aufg-name",me);}
+  draft.comments=draft.comments||[];draft.comments.push({id:uid(),author:me,text:v,at:Date.now()});renderTaskModal();}
+function saveTask(){readForm();const d=draft;
+  if(!d.title.trim()){$("#fTitle").focus();return;}
+  if(!d.projectId)d.projectId=ensureProject("Eingang").id;
+  delete d._new;d.title=d.title.trim();
+  const i=data.tasks.findIndex(x=>x.id===d.id),old=i>=0?data.tasks[i]:null,now=Date.now();
+  d.doneAt=d.status!=="done"?0:(old&&old.status==="done"&&old.doneAt)||now;
+  d.updatedAt=now;
+  if(i>=0)data.tasks[i]=d;else data.tasks.push(d);
+  closeModal();scheduleSave();renderAll();toast("Gespeichert");}
+function delTask(){const d=draft;if(!d||!confirm("Aufgabe „"+d.title+"“ löschen?"))return;
+  data.tasks=data.tasks.filter(t=>t.id!==d.id);closeModal();scheduleSave();renderAll();toast("Gelöscht");}
+
+/* ---- Ordner-Menü & Werkzeuge ---- */
+async function folderMenu(){
+  if(!dataDir)return connectDir();
+  let devices=0;try{for await(const [n,h] of dataDir.entries())if(h.kind==="file"&&DEV_RX.test(n))devices++;}catch(e){}
+  openModal(`
+    <div class="mh"><h3>OneDrive-Ordner</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="kv"><div class="k">Daten</div><div class="v">${esc(dataDir.name)} <span class="muted">· ${devices} Mac(s)/Browser</span></div></div>
+      <div class="kv"><div class="k">Eingang (Claude)</div><div class="v">${esc(dataDir.name)}/${INBOX}</div></div>
+      <p class="muted" style="font-size:13px">Claude legt die To-dos aus den DokuApp-Aufnahmen als Datei in „${esc(dataDir.name)}/${INBOX}“ ab — die App macht daraus automatisch Aufgaben (alle 15 s geprüft).</p>
+      <div class="stack">
+        <button class="btn block" onclick="claudeMenu()">📋 Anleitung für Claude anzeigen</button>
+        <button class="btn sec block" onclick="pasteMenu()">📥 Claude-Ergebnis einfügen</button>
+        <button class="btn sec block" onclick="closeModal();syncDir()">🔄 Eingang jetzt prüfen</button>
+        <button class="btn sec block" onclick="platformMenu()">☁ Aus der Mandrudi-Plattform übernehmen</button>
+        <button class="btn sec block" onclick="downloadBackup()">⬇ Backup herunterladen (JSON)</button>
+        <button class="btn sec block" onclick="closeModal();connectDir()">📂 Anderen Ordner wählen</button>
+      </div>
+    </div>
+    <div class="mf"><span class="grow"></span><button class="btn sec" onclick="closeModal()">Schließen</button></div>`);}
+function claudeMenu(){openModal(`
+    <div class="mh"><h3>Anleitung für Claude</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb"><p class="muted" style="margin-top:0">In deinem Claude-Projekt (bzw. Claude Desktop mit Zugriff auf den Mandrudi-OneDrive) als Anweisung hinterlegen. Kann Claude nicht direkt speichern, das Ergebnis über „Claude-Ergebnis einfügen“ hineinkopieren.</p>
+      <pre class="copy" id="claudeTxt">${esc(claudeText())}</pre></div>
+    <div class="mf"><span class="grow"></span><button class="btn sec" onclick="folderMenu()">Zurück</button><button class="btn" onclick="copyClaude()">Kopieren</button></div>`);}
+async function copyClaude(){try{await navigator.clipboard.writeText(claudeText());toast("Kopiert");}
+  catch(e){const r=document.createRange();r.selectNodeContents($("#claudeTxt"));const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Markiert — ⌘C zum Kopieren");}}
+function pasteMenu(){openModal(`
+    <div class="mh"><h3>Claude-Ergebnis einfügen</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb"><p class="muted" style="margin-top:0">Den Text aus Claude hier einfügen — jede Zeile „- [ ] …“ wird eine Aufgabe.</p>
+      <div class="fld"><textarea id="pasteTxt" style="min-height:220px" placeholder="# Meeting …&#10;Projekt: …&#10;&#10;## To-dos&#10;- [ ] Angebot schicken | fällig: 2026-11-03 | zuständig: …"></textarea></div></div>
+    <div class="mf"><span class="grow"></span><button class="btn sec" onclick="closeModal()">Abbrechen</button><button class="btn" onclick="doPaste()">Aufgaben anlegen</button></div>`);}
+function doPaste(){const txt=$("#pasteTxt").value;if(!txt.trim())return;
+  const n=importText("Eingefügt "+todayStr()+" "+new Date().toTimeString().slice(0,5),txt,null);
+  closeModal();if(n){scheduleSave();renderAll();}toast(n?n+" Aufgabe(n) angelegt":"Keine neuen Aufgaben gefunden (Zeilen mit „- [ ] …“)");}
+function platformMenu(){openModal(`
+    <div class="mh"><h3>Aus der Mandrudi-Plattform übernehmen</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb"><p class="muted" style="margin-top:0">Einmalig: Projekte, Aufgaben, Checklisten und Kommentare aus platform.mandrudi.com in diesen Ordner übernehmen. Mehrfaches Übernehmen erzeugt keine Doppelten; in der Plattform wird nichts gelöscht.</p>
+      <div class="fld"><label>E-Mail</label><input id="plEmail" type="email" autocomplete="username"></div>
+      <div class="fld"><label>Passwort</label><input id="plPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doPlatform()"></div>
+      <div class="err" id="plMsg"></div></div>
+    <div class="mf"><span class="grow"></span><button class="btn sec" onclick="closeModal()">Abbrechen</button><button class="btn" id="plBtn" onclick="doPlatform()">Übernehmen</button></div>`);}
+async function doPlatform(){const email=$("#plEmail").value.trim(),pass=$("#plPass").value,msg=$("#plMsg");
+  if(!email||!pass){msg.textContent="Bitte E-Mail und Passwort eingeben.";return;}
+  $("#plBtn").disabled=true;msg.style.color="var(--muted)";msg.textContent="Moment …";
+  try{const r=await platformImport(email,pass);closeModal();renderAll();
+    toast(r.np+" Projekt(e) und "+r.nt+" Aufgabe(n) übernommen");}
+  catch(e){$("#plBtn").disabled=false;msg.style.color="";
+    msg.textContent=/Invalid login/i.test(e.message||"")?"E-Mail oder Passwort falsch.":"Fehler: "+(e.message||e);}}
+function downloadBackup(){const b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");
+  a.href=u;a.download="aufgaben-backup-"+todayStr()+".json";a.click();setTimeout(()=>URL.revokeObjectURL(u),1500);toast("Backup gespeichert");}
+
+/* ============================ Start ============================ */
+$("#search").addEventListener("input",e=>{state.q=e.target.value;renderAll();});
+$("#openBtn").addEventListener("click",connectDir);
+$("#resumeBtn").addEventListener("click",resumeDir);
+loadCache();renderAll();setStatus(false);
+(async()=>{
+  /* gemerkten OneDrive-Ordner direkt öffnen (Chrome fragt ggf. einmal nach Erlaubnis) */
+  let h=null;try{h=hasFS&&await idbGet("dataDir");}catch(e){}
+  if(h){
+    try{if((await h.queryPermission({mode:"readwrite"}))==="granted"){await useDir(h);return;}}
+    catch(e){return showStart(null,"„"+h.name+"“ konnte nicht geöffnet werden — bitte neu auswählen.");}
+    return showStart(h);
+  }
+  showStart(null);
+})();
+</script>
+</body>
+</html>
