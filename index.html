@@ -261,8 +261,9 @@
 <div class="ov" id="overlay"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Feste Versionen + Prüfsumme (integrity): eine veränderte Datei auf dem CDN wird vom Browser nicht ausgeführt -->
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.10.0/lib/msal-browser.min.js" integrity="sha384-yXVL3cgcbuPa1TOmTYdr5MVOeFWnnXoYXcSIPBJ4lrnGHn8EZrbyurhG/xZMygBB" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" integrity="sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R" crossorigin="anonymous"></script>
 <script>
 "use strict";
 /* ============================ Data layer ============================ */
@@ -292,8 +293,12 @@ const PROJECT_STAGE_DEFAULTS={
 /* Anzeige-Name einer Phase in der aktuellen Sprache (t-Map, sonst kanonischer de-Name) */
 function stageLabel(s){return (s&&s.t&&s.t[lang])||(s&&s.name)||"";}
 /* Roh-Phasen (kanonische Namen) — für Editor & Import-Zuordnung */
+/* Phasen kommen auch aus geteilten Daten (OneDrive-Ordner, Backup, Cloud) — nur bekannte IDs und echte Farbwerte übernehmen */
+const cleanStages=arr=>arr.filter(s=>s&&STAGE_IDS.includes(s.id))
+  .map(s=>({...s,name:String(s.name||s.id),color:/^#[0-9a-f]{6}$/i.test(s.color)?s.color:"#8a94a6"}));
 function curStagesRaw(){const p=store&&store.projects&&store.projects.find(x=>x.id===store.current);
-  if(p&&Array.isArray(p.stages)&&p.stages.length)return p.stages;
+  const own=p&&Array.isArray(p.stages)?cleanStages(p.stages):[];
+  if(own.length)return own;
   if(p&&PROJECT_STAGE_DEFAULTS[p.name])return PROJECT_STAGE_DEFAULTS[p.name];
   return DEFAULT_STAGES;}
 /* Phasen mit in die aktuelle Sprache übersetzten Namen — für alle Anzeigen */
@@ -326,14 +331,21 @@ function applyStaticLang(){
 }
 
 function blankData(){return {contacts:[],companies:[],deals:[],activities:[]};}
+/* IDs landen in onclick-Attributen — aus Backups/gespeicherten Daten nur Projekte und Datensätze mit harmlosen IDs übernehmen */
+const SAFE_ID=/^[\w-]{1,80}$/;
+function cleanData(d){d={...blankData(),...d};
+  for(const c of ["contacts","companies","deals","activities"])
+    d[c]=(Array.isArray(d[c])?d[c]:[]).filter(r=>r&&typeof r==="object"&&(!r.id||SAFE_ID.test(r.id)));
+  return d;}
 function migrate(raw){
-  if(raw&&raw.projects&&raw.data&&raw.current&&raw.data[raw.current]){
-    for(const k in raw.data)raw.data[k]={...blankData(),...raw.data[k]};
+  if(raw&&Array.isArray(raw.projects))raw.projects=raw.projects.filter(p=>p&&SAFE_ID.test(p.id));
+  if(raw&&raw.projects&&raw.projects.length&&raw.data&&raw.current&&raw.data[raw.current]){
+    for(const k in raw.data)raw.data[k]=cleanData(raw.data[k]);
     if(!raw.projects.some(p=>p.id===raw.current))raw.current=raw.projects[0].id;
     return raw;
   }
   if(raw&&Array.isArray(raw.contacts)){const pid=uid();
-    return {v:2,projects:[{id:pid,name:"SAP"}],current:pid,data:{[pid]:{...blankData(),...raw}}};}
+    return {v:2,projects:[{id:pid,name:"SAP"}],current:pid,data:{[pid]:cleanData(raw)}};}
   const pid=uid();
   return {v:2,projects:[{id:pid,name:"SAP"}],current:pid,data:{[pid]:blankData()}};
 }
@@ -806,9 +818,12 @@ function stampLocal(){
   for(const k of [...view.keys()])if(!cur.has(k)){known.set(k,{t:tick(k),d:1});view.delete(k);n++;}
   return n>0;
 }
-/* Einträge eines anderen Macs übernehmen, wo sie neuer sind; true, wenn sich dadurch etwas geändert hat */
+/* Einträge eines anderen Macs übernehmen, wo sie neuer sind; true, wenn sich dadurch etwas geändert hat.
+   Jeder mit Zugriff auf den Ordner kann eine geraet-*.json ablegen → nur Einträge mit harmlosen IDs annehmen. */
+const SAFE_KEY=/^(p\/[\w-]{1,80}|r\/[\w-]{1,80}\/(contacts|companies|deals|activities)\/[\w-]{1,80})$/;
 function absorb(entries){let n=0;
   for(const k in entries){const e=entries[k],m=known.get(k);
+    if(!SAFE_KEY.test(k)||!e||!(e.d||(e.r&&e.r.id===k.split("/").pop())))continue;
     if(!m||e.t>m.t||(e.t===m.t&&canon(e)>canon(m))){known.set(k,e);n++;}}
   return n>0;}
 async function readDevices(dir,skipOwn){let changed=false;
@@ -1025,7 +1040,7 @@ function viewDashboard(){
       <div style="padding:15px 18px">
         ${visStages.map(({s,n,sum})=>`<div style="display:flex;align-items:center;gap:12px;margin-bottom:11px">
           <div style="width:150px;font-weight:600;font-size:13px;display:flex;align-items:center;gap:7px">
-            <span class="dot-s" style="background:${s.color}"></span>${s.name}
+            <span class="dot-s" style="background:${s.color}"></span>${esc(s.name)}
             <span onclick="toggleStage('${s.id}')" title="Phase ausblenden" style="margin-left:auto;cursor:pointer;color:var(--muted);opacity:.5;font-size:14px">⊘</span></div>
           <div style="flex:1;background:#eef1f7;border-radius:6px;height:22px;overflow:hidden">
             <div style="width:${Math.round(sum/maxSum*100)}%;background:${s.color};height:100%;border-radius:6px"></div></div>
@@ -1033,7 +1048,7 @@ function viewDashboard(){
           <div style="width:92px;text-align:right;font-weight:700">${eur(sum)}</div>
         </div>`).join("")}
         ${visStages.length?"":'<div class="muted" style="padding:4px 0">Alle Phasen ausgeblendet.</div>'}
-        ${hiddenStages.size?`<div style="margin-top:10px;padding-top:11px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)">${tr("d_hidden")} ${stageData.filter(x=>hiddenStages.has(x.s.id)).map(({s})=>`<span onclick="toggleStage('${s.id}')" style="cursor:pointer;display:inline-block;background:#eef1f7;border-radius:20px;padding:3px 11px;margin:3px 3px;font-weight:600;color:var(--ink)"><span class="dot-s" style="background:${s.color};margin-right:6px"></span>${s.name} +</span>`).join("")}</div>`:""}
+        ${hiddenStages.size?`<div style="margin-top:10px;padding-top:11px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)">${tr("d_hidden")} ${stageData.filter(x=>hiddenStages.has(x.s.id)).map(({s})=>`<span onclick="toggleStage('${s.id}')" style="cursor:pointer;display:inline-block;background:#eef1f7;border-radius:20px;padding:3px 11px;margin:3px 3px;font-weight:600;color:var(--ink)"><span class="dot-s" style="background:${s.color};margin-right:6px"></span>${esc(s.name)} +</span>`).join("")}</div>`:""}
       </div>
     </div>
     <div class="panel" style="margin-bottom:20px">
@@ -1057,7 +1072,7 @@ function viewDashboard(){
       <div class="panel"><div class="ph"><h3>${tr("d_latest")}</h3><button class="btn sm sec" onclick="go('deals')">${tr("d_pipByPhase").split(" ")[0]}</button></div>
         ${recentDeals.length?`<table><tbody>${recentDeals.map(d=>`<tr onclick="openDeal('${d.id}')">
           <td><b>${esc(d.title)}</b><div class="meta muted">${esc(companyName(d.companyId)||"—")}</div></td>
-          <td class="right"><span class="pill" style="background:${stageOf(d.stage).color}22;color:${stageOf(d.stage).color}">${stageOf(d.stage).name}</span></td>
+          <td class="right"><span class="pill" style="background:${stageOf(d.stage).color}22;color:${stageOf(d.stage).color}">${esc(stageOf(d.stage).name)}</span></td>
           <td class="right"><b>${eur(d.value)}</b></td></tr>`).join("")}</tbody></table>`:emptyBox(tr("d_noDeals"))}</div>
     </div>`;
 }
@@ -1195,12 +1210,12 @@ function viewDeals(){
   const visS=curStages().filter(s=>!hiddenStages.has(s.id));
   $("#content").innerHTML=`
     <div id="bulkbar">${bulkBar()}</div>
-    ${hiddenStages.size?`<div style="margin-bottom:12px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span>Ausgeblendete Spalten:</span>${curStages().filter(s=>hiddenStages.has(s.id)).map(s=>`<span onclick="toggleStage('${s.id}')" title="Spalte einblenden" style="cursor:pointer;background:#eef1f7;border-radius:20px;padding:3px 11px;font-weight:600;color:var(--ink)"><span class="dot-s" style="background:${s.color};margin-right:6px"></span>${s.name} +</span>`).join("")}<button class="btn sm sec" onclick="showAllStages()">Alle einblenden</button></div>`:""}
+    ${hiddenStages.size?`<div style="margin-bottom:12px;font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span>Ausgeblendete Spalten:</span>${curStages().filter(s=>hiddenStages.has(s.id)).map(s=>`<span onclick="toggleStage('${s.id}')" title="Spalte einblenden" style="cursor:pointer;background:#eef1f7;border-radius:20px;padding:3px 11px;font-weight:600;color:var(--ink)"><span class="dot-s" style="background:${s.color};margin-right:6px"></span>${esc(s.name)} +</span>`).join("")}<button class="btn sm sec" onclick="showAllStages()">Alle einblenden</button></div>`:""}
     ${visS.length?`<div class="board" style="grid-template-columns:repeat(${visS.length},minmax(180px,1fr))">${visS.map(s=>{
     const items=list.filter(d=>d.stage===s.id);
     const sum=items.reduce((a,d)=>a+(+d.value||0),0);
     return `<div class="col" data-stage="${s.id}" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropDeal(event)">
-      <h4><span class="dot-s" style="background:${s.color}"></span>${s.name}<span class="cnt">${items.length}</span><span class="sum">${eur(sum)}</span><span onclick="toggleStage('${s.id}')" title="Spalte ausblenden" style="cursor:pointer;margin-left:8px;color:var(--muted);opacity:.5;font-size:13px">⊘</span></h4>
+      <h4><span class="dot-s" style="background:${s.color}"></span>${esc(s.name)}<span class="cnt">${items.length}</span><span class="sum">${eur(sum)}</span><span onclick="toggleStage('${s.id}')" title="Spalte ausblenden" style="cursor:pointer;margin-left:8px;color:var(--muted);opacity:.5;font-size:13px">⊘</span></h4>
       ${items.map(d=>`<div class="card ${sel.has(d.id)?"selrow":""} ${d.done?"donecard":""}" draggable="true" ondragstart="dragStart(event,'${d.id}')" onclick="openDeal('${d.id}')">
         <span style="float:right">${selCheckbox(d.id)}</span>
         <div class="t">${esc(d.title)}</div>
@@ -1302,11 +1317,11 @@ function openContact(id){const c=byId(db.contacts,id);const deals=db.deals.filte
       <div class="kv"><div class="k">Letzter Kontakt</div><div class="v">${c.lastContact?new Date(c.lastContact).toLocaleDateString("de-DE"):"—"}</div></div>
       <div class="kv"><div class="k">Tags</div><div class="v">${(c.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join("")||"—"}</div></div>
       ${c.notes?`<div class="detail-sec"><h4>Notizen</h4><div>${esc(c.notes)}</div></div>`:""}
-      ${deals.length?`<div class="detail-sec"><h4>Deals</h4>${deals.map(d=>`<div class="kv"><div class="v">${esc(d.title)}</div><div class="right"><span class="pill" style="background:${stageOf(d.stage).color}22;color:${stageOf(d.stage).color}">${stageOf(d.stage).name}</span> <b>${eur(d.value)}</b></div></div>`).join("")}</div>`:""}
+      ${deals.length?`<div class="detail-sec"><h4>Deals</h4>${deals.map(d=>`<div class="kv"><div class="v">${esc(d.title)}</div><div class="right"><span class="pill" style="background:${stageOf(d.stage).color}22;color:${stageOf(d.stage).color}">${esc(stageOf(d.stage).name)}</span> <b>${eur(d.value)}</b></div></div>`).join("")}</div>`:""}
       ${acts.length?`<div class="detail-sec"><h4>Aktivitäten</h4>${acts.map(a=>`<div class="kv"><div class="v">${(a.done?"✓ ":"◦ ")+esc(a.title)}</div><div class="right muted">${daysInfo(a.dueDate).txt}</div></div>`).join("")}</div>`:""}
     </div>
     <div class="mf"><button class="btn sec" onclick="closeModal()">Schließen</button>
-      <button class="btn" onclick='contactForm(${JSON.stringify(c)})'>Bearbeiten</button></div>`);}
+      <button class="btn" onclick="contactForm(byId(db.contacts,'${c.id}'))">Bearbeiten</button></div>`);}
 
 /* ---- Company ---- */
 function companyForm(c={}){openModal(`
@@ -1337,7 +1352,7 @@ function openCompany(id){const c=byId(db.companies,id);const cts=db.contacts.fil
       <div class="kv"><div class="k">Adresse</div><div class="v">${esc(c.address||"—")}</div></div>
       ${c.notes?`<div class="detail-sec"><h4>Notizen</h4><div>${esc(c.notes)}</div></div>`:""}
       ${cts.length?`<div class="detail-sec"><h4>Kontakte (${cts.length})</h4>${cts.map(x=>`<div class="kv"><div class="v">${esc(x.firstName)} ${esc(x.lastName)}</div><div class="muted">${esc(x.position||"")}</div></div>`).join("")}</div>`:""}
-      ${deals.length?`<div class="detail-sec"><h4>Deals (${deals.length})</h4>${deals.map(d=>`<div class="kv"><div class="v">${esc(d.title)}</div><div class="right"><span class="pill" style="background:${stageOf(d.stage).color}22;color:${stageOf(d.stage).color}">${stageOf(d.stage).name}</span> <b>${eur(d.value)}</b></div></div>`).join("")}</div>`:""}
+      ${deals.length?`<div class="detail-sec"><h4>Deals (${deals.length})</h4>${deals.map(d=>`<div class="kv"><div class="v">${esc(d.title)}</div><div class="right"><span class="pill" style="background:${stageOf(d.stage).color}22;color:${stageOf(d.stage).color}">${esc(stageOf(d.stage).name)}</span> <b>${eur(d.value)}</b></div></div>`).join("")}</div>`:""}
       ${docsSection("companies",c)}
     </div>
     <div class="mf"><button class="btn sec" onclick="closeModal()">Schließen</button>
@@ -1349,7 +1364,7 @@ function dealForm(d={}){openModal(`
   <div class="mb"><form id="f" onsubmit="return saveDeal(event,'${d.id||""}')">
     <div class="fld"><label>Titel *</label><input name="title" required value="${esc(d.title)}"></div>
     <div class="row2"><div class="fld"><label>Wert (€)</label><input name="value" type="number" min="0" step="100" value="${esc(d.value)}"></div>
-      <div class="fld"><label>Phase</label><select name="stage">${curStages().map(s=>`<option value="${s.id}" ${s.id===(d.stage||"lead")?"selected":""}>${s.name}</option>`).join("")}</select></div></div>
+      <div class="fld"><label>Phase</label><select name="stage">${curStages().map(s=>`<option value="${s.id}" ${s.id===(d.stage||"lead")?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div></div>
     <div class="row2"><div class="fld"><label>Firma</label><select name="companyId">${companyOptions(d.companyId)}</select></div>
       <div class="fld"><label>Ansprechpartner</label><select name="contactId">${contactOptions(d.contactId)}</select></div></div>
     <div class="row2"><div class="fld"><label>Kandidat</label><input name="candidate" value="${esc(d.candidate)}" placeholder="Name des Kandidaten/Beraters"></div>
